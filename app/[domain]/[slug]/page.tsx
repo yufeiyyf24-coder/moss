@@ -10,6 +10,16 @@ import { WorldShell } from "@/components/world-shell";
 import { GrowthNode } from "@/components/growth-node";
 import { ShouhuxingBody } from "@/components/shouhuxing-body";
 import { ShouhuxingHero } from "@/components/shouhuxing-hero";
+import { XiaojiBody } from "@/components/xiaoji-body";
+import { CptsdBody } from "@/components/cptsd-body";
+import { AsthmaBody } from "@/components/asthma-body";
+import { MoorBody } from "@/components/moor-body";
+import { LinhangBody } from "@/components/linhang-body";
+import { NextLifeBody } from "@/components/next-life-body";
+import { VisualNotesBody } from "@/components/visual-notes-body";
+import { YesBookBody } from "@/components/yes-book-body";
+import { FragmentsBody } from "@/components/fragments-body";
+import { AiThoughtsBody } from "@/components/ai-thoughts-body";
 
 /* ------------------------------------------------------------------ */
 /*  Static params                                                      */
@@ -45,8 +55,27 @@ function ProjectBody({ slug }: { slug: string }) {
   switch (slug) {
     case "shouhuxing":
       return <ShouhuxingBody />;
+    case "xiaoji":
+      return <XiaojiBody />;
+    case "ai-thoughts":
+      return <AiThoughtsBody />;
+    case "cptsd":
+      return <CptsdBody />;
+    case "asthma":
+      return <AsthmaBody />;
+    case "moor":
+      return <MoorBody />;
+    case "linhang":
+      return <LinhangBody />;
+    case "next-life":
+      return <NextLifeBody />;
+    case "visual-notes":
+      return <VisualNotesBody />;
+    case "yes-book":
+      return <YesBookBody />;
+    case "fragments":
+      return <FragmentsBody />;
 
-    /* future project bodies will be added here */
     default:
       return (
         <section className="px-6 pb-32 pt-20 sm:px-10 lg:px-20">

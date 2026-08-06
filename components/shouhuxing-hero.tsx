@@ -29,20 +29,32 @@ const MotionLink = motion.create(Link);
 
 /* ------------------------------------------------------------------ */
 /*  家属每天面对、却没有答案的问题                                       */
+/*                                                                      */
+/*  x / y：句子在屏幕上的初始位置，取值范围 0–1（相对于视口宽/高）        */
+/*  fontSize：可选，默认 20。调整位置时注意避开中心区域（螺旋汇聚会吸进去）*/
 /* ------------------------------------------------------------------ */
 
 const SENTENCES = [
-  "今天药吃了吗？",
-  "为什么一直不说话？",
-  "什么时候该去医院？",
-  "是不是副作用？",
-  "我是不是做错了？",
-  "今天又没睡……",
-  "我还能坚持多久？",
-  "没人能理解……",
+  { text: "今天药吃了吗？",       x: 0.12, y: 0.18, fontSize: 24 },
+  { text: "为什么一直不说话？",    x: 0.72, y: 0.10, fontSize: 20 },
+  { text: "什么时候该去医院？",    x: 0.25, y: 0.30, fontSize: 28 },
+  { text: "是不是副作用？",        x: 0.50, y: 0.22, fontSize: 24 },
+  { text: "他已经不认识我了……",   x: 0.10, y: 0.42, fontSize: 22 },
+  { text: "我好累",               x: 0.85, y: 0.28, fontSize: 33 },
+  { text: "我是不是做错了？",      x: 0.34, y: 0.58, fontSize: 34 },
+  { text: "今天又没睡……",         x: 0.25, y: 0.90, fontSize: 20 },
+  { text: "不敢告诉别人",          x: 0.14, y: 0.75, fontSize: 26 },
+  { text: "什么时候才能好起来？",   x: 0.88, y: 0.70, fontSize: 22 },
+  { text: "我还能坚持多久？",      x: 0.45, y: 0.82, fontSize: 24 },
+  { text: "没人能理解……",         x: 0.75, y: 0.90, fontSize: 20 },
+  { text: "为什么偏偏是我们",       x: 0.60, y: 0.65, fontSize: 30 },
+  { text: "他以前不是这样的",       x: 0.40, y: 0.10, fontSize: 25 },
+  { text: "我是不是不够好",         x: 0.92, y: 0.45, fontSize: 24 },
+  { text: "到底有没有希望",         x: 0.65, y: 0.35, fontSize: 28 },
+
 ];
 
-const NIGHT = "#0d1420";
+const NIGHT = "#152135";
 const MINT = "#e5f4f1";
 const STAR_CORE = "radial-gradient(circle at 35% 35%, #f2fdfa, #35c9b8 55%, #15b7a8 100%)";
 
@@ -134,52 +146,91 @@ function StaticTopBar({ domain }: { domain: Domain }) {
 /* ------------------------------------------------------------------ */
 
 function TwinkleStars({ progress }: { progress: MotionValue<number> }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const stars = useMemo(
     () =>
-      Array.from({ length: 42 }, (_, i) => {
+      Array.from({ length: 80 }, (_, i) => {
         const h = hashString(`star-${i}`);
+        // 用 index 乘大质数分散坐标，避免 hash 值太接近导致星星扎堆
+        const x = (((h ^ (i * 7919)) >>> 0) % 100000) / 1000;
+        const y = ((((h >>> 3) ^ (i * 6271)) >>> 0) % 92000) / 1000;
         return {
-          left: (h % 1000) / 10,
-          top: ((h >> 3) % 880) / 10,
-          size: 2 + ((h >> 5) % 3),
-          duration: 4.5 + ((h >> 7) % 40) / 10,
-          delay: ((h >> 9) % 50) / 10,
-          glow: ((h >> 11) % 10) < 3,
+          x,
+          y,
+          r: 0.4 + ((h >>> (i % 17)) % 12) / 10, // 0.4–1.5px
+          twinkleSpeed: 0.0008 + ((h >>> (8 + (i % 7))) % 5) / 1000,
+          phase: ((h >>> (16 + (i % 5))) % 628) / 100,
+          brightness: 0.25 + ((h >>> (i % 13)) % 7) / 10, // 0.25–0.85
+          glow: ((h >>> (i % 11)) % 10) < 1,
         };
       }),
     []
   );
-  // 背景变亮时星点退场
-  const opacity = useTransform(progress, [0.66, 0.84], [1, 0]);
+
+  const containerOpacity = useTransform(progress, [0.66, 0.84], [1, 0]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.scale(dpr, dpr);
+
+    let raf: number;
+    const tick = () => {
+      ctx.clearRect(0, 0, w, h);
+      const t = performance.now();
+      for (const s of stars) {
+        const alpha = s.brightness * (0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.phase));
+        const x = (s.x / 100) * w;
+        const y = (s.y / 100) * h;
+
+        if (s.glow) {
+          // 带微光的大星
+          const grd = ctx.createRadialGradient(x, y, 0, x, y, s.r * 2.5);
+          grd.addColorStop(0, `rgba(186,240,231,${alpha})`);
+          grd.addColorStop(0.4, `rgba(186,240,231,${alpha * 0.3})`);
+          grd.addColorStop(1, "rgba(186,240,231,0)");
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(x, y, s.r * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 星核
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 普通小白点
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [stars]);
 
   return (
     <motion.div
       className="pointer-events-none absolute inset-0"
-      style={{ opacity }}
+      style={{ opacity: containerOpacity }}
       aria-hidden="true"
     >
-      {stars.map((s, i) => (
-        <span
-          key={i}
-          className="animate-twinkle absolute rounded-full"
-          style={
-            {
-              left: `${s.left}%`,
-              top: `${s.top}%`,
-              width: s.size,
-              height: s.size,
-              background: s.glow
-                ? "rgba(186,240,231,0.9)"
-                : "rgba(255,255,255,0.9)",
-              boxShadow: s.glow
-                ? "0 0 6px rgba(21,183,168,0.8)"
-                : "0 0 4px rgba(255,255,255,0.5)",
-              "--twinkle-duration": `${s.duration}s`,
-              "--twinkle-delay": `${s.delay}s`,
-            } as CSSProperties
-          }
-        />
-      ))}
+      <canvas ref={canvasRef} className="absolute inset-0" />
     </motion.div>
   );
 }
@@ -189,33 +240,36 @@ function TwinkleStars({ progress }: { progress: MotionValue<number> }) {
 /* ------------------------------------------------------------------ */
 
 function FloatingSentence({
-  text,
+  sentence,
   progress,
   center,
+  rank,
+  total,
 }: {
-  text: string;
+  sentence: { text: string; x: number; y: number; fontSize?: number };
   progress: MotionValue<number>;
   center: { x: number; y: number };
+  /** 0-based 排名：0 = 离中心最近，最先进入 */
+  rank: number;
+  total: number;
 }) {
+  const text = sentence.text;
   const driftRef = useRef<HTMLDivElement>(null);
 
   const meta = useMemo(() => {
     const h = hashString(text);
     return {
-      // 以屏幕中心对称分布（10%–90%），避免整体偏一侧
-      baseX:
-        (0.5 + (((h >> 1) % 1001) - 500) / 1000) * 0.8 * window.innerWidth +
-        window.innerWidth * 0.1,
-      baseY: 0.1 + (((h >> 3) % 72) / 100) * window.innerHeight, // 10%–82%
-      fontSize: 20 + ((h >> 5) % 3) * 4, // 20 / 24 / 28px
-      opacity: 0.2 + ((h >> 7) % 5) * 0.07, // 0.2–0.48 偏透明
-      rotate: ((h >> 9) % 7) - 3, // -3°–3°
-      amp: 6 + ((h >> 11) % 4) * 4, // 漂移幅度 6–18px
-      speed: 0.00012 + ((h >> 13) % 5) * 0.00002, // 每帧角速度
+      baseX: sentence.x * window.innerWidth,
+      baseY: sentence.y * window.innerHeight,
+      fontSize: sentence.fontSize ?? 20,
+      opacity: 0.2 + ((h >> 7) % 5) * 0.07,
+      rotate: ((h >> 9) % 7) - 3,
+      amp: 6 + ((h >> 11) % 4) * 4,
+      speed: 0.00012 + ((h >> 13) % 5) * 0.00002,
       p1: ((h >> 15) % 628) / 100,
       p2: ((h >> 17) % 628) / 100,
     };
-  }, [text]);
+  }, [sentence]);
 
   // 漂移：rAF 直接写 inner transform，不触发 React 重渲染
   useEffect(() => {
@@ -235,41 +289,64 @@ function FloatingSentence({
     return () => cancelAnimationFrame(raf);
   }, [meta, progress]);
 
-  // 螺旋汇聚（0.30–0.62）：半径缓入缓出缩向中心，角度同时旋转
-  // 1.5–2.4 圈（方向由哈希决定），越靠近中心越慢，像被引力卷进去
-  const spiral = useMemo(() => {
-    const h = hashString(`${text}-spiral`);
-    const dx = meta.baseX - center.x;
-    const dy = meta.baseY - center.y;
-    const startR = Math.sqrt(dx * dx + dy * dy);
-    const startTheta = Math.atan2(dy, dx);
-    const dir = (h & 1) === 0 ? 1 : -1;
-    const turns = dir * (1.5 + ((h >> 1) % 10) / 10);
-    return { startR, startTheta, turns };
-  }, [meta.baseX, meta.baseY, center.x, center.y, text]);
+  // 逐个进入中心：最近（rank=0）最早，最远最晚，直线慢飞
+  const staggerDelay = 0.028;
+  const convergeDuration = 0.10;
+  const convergeStart = 0.30 + rank * staggerDelay;
+  const convergeEnd = convergeStart + convergeDuration;
 
-  const radius = useTransform(progress, [0.3, 0.62], [spiral.startR, 0], {
+  // 直线飞入：直接从初始位置平滑移动到中心
+  const x = useTransform(progress, [convergeStart, convergeEnd], [meta.baseX, center.x], {
     ease: easeInOutCubic,
   });
-  const angle = useTransform(
-    progress,
-    [0.3, 0.62],
-    [spiral.startTheta, spiral.startTheta + spiral.turns * Math.PI * 2],
-    { ease: easeInOutCubic }
-  );
-  const x = useTransform([radius, angle], ([r, a]: number[]) => center.x + r * Math.cos(a));
-  const y = useTransform([radius, angle], ([r, a]: number[]) => center.y + r * Math.sin(a));
+  const y = useTransform(progress, [convergeStart, convergeEnd], [meta.baseY, center.y], {
+    ease: easeInOutCubic,
+  });
 
-  // 消散（0.58–0.74）：文字变成光
-  const opacity = useTransform(progress, [0.58, 0.74], [meta.opacity, 0]);
-  const blurMV = useTransform(progress, [0.58, 0.74], [0, 6]);
-  const scale = useTransform(progress, [0.58, 0.74], [1, 0.75]);
-  const filter = useMotionTemplate`blur(${blurMV}px)`;
+  // 抵达中心后消散：在汇聚窗口结束后的 dissolveDuration 内淡出
+  const dissolveDuration = 0.08;
+  const dissolveEnd = convergeEnd + dissolveDuration;
+
+  // 完整生命周期：漂浮 → 汇聚（保持不透明） → 消散 → 隐藏
+  const sentenceOpacity = useTransform(progress, (v) => {
+    if (v < convergeStart) return meta.opacity;
+    if (v < convergeEnd) return meta.opacity;
+    if (v < dissolveEnd) {
+      const t = (v - convergeEnd) / dissolveDuration;
+      return meta.opacity * (1 - t);
+    }
+    return 0;
+  });
+  const sentenceScale = useTransform(progress, (v) => {
+    if (v < convergeEnd) return 1;
+    if (v < dissolveEnd) {
+      const t = (v - convergeEnd) / dissolveDuration;
+      return 1 - 0.25 * t;
+    }
+    return 0.75;
+  });
+  const sentenceBlur = useTransform(progress, (v) => {
+    if (v < convergeEnd) return 0;
+    if (v < dissolveEnd) {
+      const t = (v - convergeEnd) / dissolveDuration;
+      return 6 * t;
+    }
+    return 6;
+  });
+  const sentenceFilter = useMotionTemplate`blur(${sentenceBlur}px)`;
 
   return (
     <motion.div
       className="pointer-events-none absolute z-10"
-      style={{ left: x, top: y, x: "-50%", y: "-50%", opacity, scale, filter }}
+      style={{
+        left: x,
+        top: y,
+        x: "-50%",
+        y: "-50%",
+        opacity: sentenceOpacity,
+        scale: sentenceScale,
+        filter: sentenceFilter,
+      }}
     >
       <div ref={driftRef} className="will-change-transform">
         <span
@@ -370,18 +447,27 @@ function ParticleBurst({
 /*  星 — 最亮的一颗，心跳一次                                          */
 /* ------------------------------------------------------------------ */
 
-function StarGlow({ progress }: { progress: MotionValue<number> }) {
+function StarGlow({
+  progress,
+  glowIntensity,
+}: {
+  progress: MotionValue<number>;
+  /** 0–1，每有一个句子抵达中心就亮一分 */
+  glowIntensity: MotionValue<number>;
+}) {
   const [pulsed, setPulsed] = useState(false);
   useMotionValueEvent(progress, "change", (v) => {
-    if (v > 0.74 && !pulsed) setPulsed(true);
+    if (v > 0.66 && !pulsed) setPulsed(true);
   });
 
-  const opacity = useTransform(progress, [0.66, 0.72], [0, 1]);
+  const baseOpacity = useTransform(progress, [0.62, 0.72], [0, 1]);
+  // 亮度随句子抵达数从 0.35 升到 1.0
+  const glowMultiplier = useTransform(glowIntensity, [0, 1], [0.35, 1.0]);
 
   return (
     <motion.div
       className="pointer-events-none absolute left-1/2 top-[36%] z-30 -translate-x-1/2 -translate-y-1/2"
-      style={{ opacity }}
+      style={{ opacity: baseOpacity }}
       aria-hidden="true"
     >
       <motion.div
@@ -389,21 +475,29 @@ function StarGlow({ progress }: { progress: MotionValue<number> }) {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative flex items-center justify-center"
       >
-        <span
+        <motion.span
           className="absolute h-[60px] w-[60px] rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(21,183,168,0.35) 0%, transparent 65%)",
+            opacity: glowMultiplier,
           }}
         />
-        <span
+        <motion.span
           className="absolute h-[30px] w-[30px] rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(21,183,168,0.5) 0%, transparent 70%)",
+            opacity: glowMultiplier,
           }}
         />
-        <span className="relative h-[14px] w-[14px] rounded-full" style={{ background: STAR_CORE }} />
+        <motion.span
+          className="relative h-[14px] w-[14px] rounded-full"
+          style={{
+            background: STAR_CORE,
+            opacity: glowMultiplier,
+          }}
+        />
       </motion.div>
     </motion.div>
   );
@@ -420,12 +514,11 @@ function TitleBlock({
   progress: MotionValue<number>;
   subtitle: string;
 }) {
-  // 星形成时标题开始淡入，到 0.78 完全不透明并保持不变
-  const opacity = useTransform(progress, [0.66, 0.78], [0, 1]);
+  // 星形成时标题开始淡入，到 0.78 后强制保持 1
+  const opacity = useTransform(progress, (v) => (v >= 0.78 ? 1 : v <= 0.66 ? 0 : (v - 0.66) / 0.12));
   const y = useTransform(progress, [0.66, 0.78], [24, 0]);
-  // 顶部始终保留深色 → 标题保持夜空亮色，全部不透明
-  const color = "#eef2f7";
-  const subColor = "#eef2f7";
+  const color = "#ffffff";
+  const subColor = "#ffffff";
 
   return (
     <motion.div
@@ -477,11 +570,14 @@ function ContinueArrow({
       <motion.button
         onClick={onEnter}
         aria-label="收起深色页面，进入正文"
-        className="animate-float flex flex-col items-center gap-1 rounded-full border border-shx-teal/50 bg-shx-card/90 px-6 py-2.5 text-shx-teal shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-shx-teal hover:text-white"
+        className="animate-float flex flex-col items-center gap-2 text-[#eef2f7] transition-opacity duration-500 hover:opacity-70"
         style={{ opacity, pointerEvents: pointer }}
       >
         <span className="text-sm font-light tracking-[0.2em]">第一章</span>
-        <span className="text-base leading-none">↓</span>
+        <span className="flex flex-col items-center leading-[0.5]">
+          <span>﹀</span>
+          <span>﹀</span>
+        </span>
       </motion.button>
     </div>
   );
@@ -543,29 +639,75 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
     };
   }, [unlocked, mounted]);
 
-  // 收起深色页面：解锁并平滑滚到容器底，正文第一屏进入视口
+  // 收起深色页面：回到顶部，同时折叠 hero，过渡完正文自然在视口里
+  const [collapsed, setCollapsed] = useState(false);
   const enterBody = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     setUnlocked(true);
-    window.scrollTo({ top: window.innerHeight * 4, behavior: "smooth" });
+    setCollapsed(true);
   }, []);
 
-  // 句子汇聚完成后（~62%）下方开始变浅，80% 完成，之后停住
-  const bgBrighten = useTransform(scrollYProgress, [0.62, 0.8], [0, 1]);
+  // 亮阶段：底部从 NIGHT 渐变到 MINT（alpha 合在色值里，不设 opacity）
+  const brightBg = useTransform(scrollYProgress, (v) => {
+    const t = v < 0.62 ? 0 : v > 0.80 ? 1 : (v - 0.62) / 0.18;
+    const r = Math.round(0x15 + (0xe5 - 0x15) * t);
+    const g = Math.round(0x21 + (0xf4 - 0x21) * t);
+    const b = Math.round(0x35 + (0xf1 - 0x35) * t);
+    return `linear-gradient(to bottom, ${NIGHT} 0%, ${NIGHT} 38%, rgb(${r},${g},${b}) 88%)`;
+  });
+
+  // 暗阶段：四周压暗晕影（alpha 合在色值里，不设 opacity）
+  const vignetteBg = useTransform(scrollYProgress, (v) => {
+    const a = v < 0.80 ? 0 : v > 0.93 ? 0.7 : ((v - 0.80) / 0.13) * 0.7;
+    return `radial-gradient(ellipse 50% 50% at 50% 40%, transparent 0%, transparent 40%, rgba(0,0,0,${a.toFixed(3)}) 100%)`;
+  });
+
+  // 句子按距离中心排序：最近的 rank=0，最先进入
+  const sortedSentences = useMemo(() => {
+    if (!mounted) return SENTENCES.map((s, i) => ({ ...s, dist: 0, origIndex: i }));
+    const withDist = SENTENCES.map((s, i) => {
+      const sx = s.x * window.innerWidth;
+      const sy = s.y * window.innerHeight;
+      return { ...s, dist: Math.hypot(sx - center.x, sy - center.y), origIndex: i };
+    });
+    withDist.sort((a, b) => a.dist - b.dist);
+    return withDist;
+  }, [center.x, center.y, mounted]);
+
+  // 中心亮度：每有一个句子抵达就亮一分
+  const staggerDelay = 0.028;
+  const convergeDuration = 0.10;
+  const centerGlow = useTransform(scrollYProgress, (v) => {
+    let glow = 0;
+    for (let i = 0; i < SENTENCES.length; i++) {
+      const start = 0.30 + i * staggerDelay;
+      const end = start + convergeDuration;
+      if (v >= end) glow += 1;
+      else if (v > start) glow += (v - start) / (end - start);
+    }
+    return glow / SENTENCES.length;
+  });
 
   return (
-    <div ref={containerRef} className="relative" style={{ height: "400vh" }}>
-      {mounted && (
+    <div
+      ref={containerRef}
+      className="relative transition-[height] duration-500 ease-out"
+      style={{ height: collapsed ? "0px" : "400vh" }}
+    >
+      {mounted && !collapsed && (
         <div className="sticky top-0 h-screen overflow-hidden">
           {/* 夜空：纯深色，不用渐变 */}
           <div className="absolute inset-0" style={{ background: NIGHT }} />
 
-          {/* 顶部保留深色、下方渐亮为浅青（句子汇聚之后开始） */}
+          {/* 亮阶段：下方变浅（无 opacity） */}
           <motion.div
-            className="absolute inset-0"
-            style={{
-              opacity: bgBrighten,
-              background: `linear-gradient(to bottom, ${NIGHT} 0%, ${NIGHT} 38%, ${MINT} 88%)`,
-            }}
+            className="absolute inset-0 z-0"
+            style={{ background: brightBg }}
+          />
+          {/* 暗阶段：四周压暗晕影（无 opacity；纯黑叠加，不会和夜空色混淆） */}
+          <motion.div
+            className="absolute inset-0 z-[1] pointer-events-none"
+            style={{ background: vignetteBg }}
           />
 
           {/* 噪点纹理 */}
@@ -580,21 +722,23 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
           {/* 星点 */}
           <TwinkleStars progress={scrollYProgress} />
 
-          {/* 漂浮的问题 */}
-          {SENTENCES.map((s) => (
+          {/* 漂浮的问题：按距离排序，最近的先进入中心 */}
+          {sortedSentences.map((s, i) => (
             <FloatingSentence
-              key={s}
-              text={s}
+              key={s.text}
+              sentence={s}
               progress={scrollYProgress}
               center={center}
+              rank={i}
+              total={SENTENCES.length}
             />
           ))}
 
           {/* 粒子汇聚 */}
           <ParticleBurst progress={scrollYProgress} center={center} />
 
-          {/* 星 */}
-          <StarGlow progress={scrollYProgress} />
+          {/* 星：每个句子抵达时亮一分 */}
+          <StarGlow progress={scrollYProgress} glowIntensity={centerGlow} />
 
           {/* 标题 */}
           <TitleBlock progress={scrollYProgress} subtitle={project.subtitle} />
@@ -611,6 +755,8 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
           />
         </div>
       )}
+      {/* hero 折叠后显示静态顶栏，替代消失的 AnimatedTopBar */}
+      {collapsed && <StaticTopBar domain={domain} />}
     </div>
   );
 }

@@ -489,7 +489,6 @@ export function ShouhuxingBody() {
         title="第一章 · 土壤"
         subtitle="为什么做？在精神疾病面前，有一个群体被系统性地忽视了。"
         layout="wide"
-        titleAlign="overlay"
       >
         <SpreadLayout ratio="55-45" offset="right-down">
           {/* 左栏：700 万大字 + 引言；lg:mt-24 让左栏整体下移一个 700 万行高（96px），顶部对齐 700 万字的下沿 */}

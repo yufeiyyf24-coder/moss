@@ -82,48 +82,57 @@ export const projects: Project[] = [
   },
   {
     slug: "cptsd",
-    title: "把 C-PTSD 急救藏进耳机和坐垫里",
-    subtitle: "创伤反应的早期安抚与身体介入",
+    title: "安途",
+    subtitle: "C-PTSD 双场景调节系统 · 骨传导耳机 + 智能坐垫",
     summary:
-      "探索如何通过骨传导耳机与智能坐垫，在创伤反应出现的早期提供非语言、身体化的安抚与接地支持。",
+      "将 EMDR 双侧刺激、稳定化技术与体感安抚隐形于运动颈圈与家居坐垫中，在病耻感为零的前提下提供实时被动守护。",
     domains: ["mind"],
     status: "seed",
   },
   {
     slug: "asthma",
     title: "哮喘环境守护",
-    subtitle: "为哮喘患者设计的居家空气守护系统",
+    subtitle: "居家空气质量监测 · 光语言替代屏幕 · 织物包裹去医疗化",
     summary:
-      "从居家环境诱因出发，设计无感监测、光语言预警与行动建议相结合的哮喘空气守护系统。",
+      "22份问卷驱动设计。81.8%患者家中无检测设备——不是不需要，是现有产品「只显示数字不指导行动」。用呼吸灯色替代数字屏幕，把监测仪做成家居装饰品。",
     domains: ["mind"],
-    status: "seed",
+    status: "growing",
   },
   {
     slug: "moor",
-    title: "Moor",
-    subtitle: "给 ADHD 的专注辅助副屏",
+    title: "ADHD 专注辅助副屏",
+    subtitle: "鱼骨图实时脉络 · 课堂注意力定锚设备",
     summary:
-      "一款为 ADHD 用户在课堂与会议场景设计的独立桌面副屏，实时整理内容脉络，辅助注意力定锚与课后回顾。",
+      "5 寸独立副屏，实时语音转文字+AI 脉络整理。低存在感设计——走神回来能一眼定位，需要时才展开，全程自管理。",
     domains: ["living"],
     status: "seed",
   },
   {
     slug: "linhang",
     title: "麟航",
-    subtitle: "儿童环境安全检测无人机",
+    subtitle: "儿童环境安全监测无人机 · 三重递进式干预",
     summary:
-      "面向儿童活动空间的环境安全检测无人机，让不可见的风险被温和地看见，让安全关怀不变成监控。",
+      "面向 4-6 岁儿童家庭。毫米波雷达+AI 视觉预警 → 儿童心理学适配语音引导 → 物理阻隔。定义了两套完整场景：室内厨房 + 室外游乐场。",
     domains: ["living"],
     status: "seed",
   },
   {
     slug: "xiaoji",
-    title: "洄小叽",
-    subtitle: "一只住在桌面上的猫系 AI 伙伴",
+    title: "洄",
+    subtitle: "73M 参数，从零训练的桌面猫系 AI",
     summary:
-      "从零炼成的 48M 参数 LLM 驱动的桌面宠物：傲娇、会捣乱、也会在你需要时出现。",
+      "不是调用 API，而是从 Wiki 预训练开始，到对话微调，到推理部署，完整走通了一遍「造一个小 AI」的全流程。傲娇、会捣乱、也会在你需要时出现。",
     domains: ["ai"],
-    status: "seed",
+    status: "growing",
+  },
+  {
+    slug: "ai-thoughts",
+    title: "我与 AI",
+    subtitle: "从使用到协作 —— 和 AI 一起思考的这两年",
+    summary:
+      "从 DeepSeek 到 Claude，从「AI 帮我干活」到「AI 是我的搭档」再到「我训练了自己的 AI」。一段关于人机关系持续演化的记录。",
+    domains: ["ai"],
+    status: "growing",
   },
   {
     slug: "next-life",
@@ -135,11 +144,29 @@ export const projects: Project[] = [
     status: "seed",
   },
   {
-    slug: "books",
-    title: "书单与阅读的痕迹",
-    subtitle: "一些书，以及它们留下的连接",
+    slug: "visual-notes",
+    title: "视觉笔记",
+    subtitle: "摄影与绘画的碎片",
     summary:
-      "阅读不是为了读完，而是为了在某句话里停下来，让想法继续生长。",
+      "不是作品集，是用镜头和笔留下的观察。一些光、一些影子、一些在脑子里停留过的画面。",
+    domains: ["visual"],
+    status: "seed",
+  },
+  {
+    slug: "yes-book",
+    title: "《Yes》",
+    subtitle: "一本关于「自我」的科普书",
+    summary:
+      "从神经科学、心理学到 AI，追问同一个问题：一个复杂系统什么时候开始说「我」？",
+    domains: ["connections"],
+    status: "growing",
+  },
+  {
+    slug: "fragments",
+    title: "碎片与连线",
+    subtitle: "一些还没长成形状的想法",
+    summary:
+      "零碎的观察、跨领域的连接、半成型的思考。它们是种子，有些会发芽，有些不会。",
     domains: ["connections"],
     status: "seed",
   },
