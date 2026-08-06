@@ -1,0 +1,3191 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>守护星APP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* 手机外壳 */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: #fff;
+    border-radius: 40px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 150px; height: 30px;
+    background: #000;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    z-index: 1002;
+  }
+  .status-bar {
+    height: 44px;
+    background: #E5F4F1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 24px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    position: relative;
+    z-index: 1001;
+  }
+  .status-bar .time { position: absolute; left: 50%; transform: translateX(-50%); }
+
+  /* 页面容器 */
+  .app-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #E5F4F1;
+    position: relative;
+    scrollbar-width: none;
+  }
+  .app-body::-webkit-scrollbar { display: none; }
+
+  /* 顶部导航栏 */
+  .main-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #E5F4F1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 4px;
+  }
+  .header-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #15B7A8;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 2px 6px rgba(21,183,168,0.25);
+    transition: transform 0.2s;
+  }
+  .header-avatar:active { transform: scale(0.92); }
+  .header-title {
+    font-size: 17px; font-weight: 700; color: #333;
+    position: absolute; left: 50%; transform: translateX(-50%);
+  }
+  .header-notify {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .header-notify:active { background: rgba(255,255,255,0.9); }
+  .header-notify .badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 18px; height: 18px;
+    background: #ff6b6b;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #E5F4F1;
+  }
+
+  /* 底部Tab */
+  .tab-bar {
+    height: 64px;
+    background: #fff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 10px;
+    z-index: 998;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #999;
+    font-size: 11px;
+  }
+  .tab-item.active { color: #15B7A8; }
+  .tab-item svg { width: 24px; height: 24px; transition: transform 0.2s; }
+  .tab-item:active svg { transform: scale(0.9); }
+
+  /* Loading页面 */
+  .loading-screen {
+    position: absolute;
+    inset: 0;
+    background: #E5F4F1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    transition: opacity 0.6s ease;
+  }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .loading-logo {
+    width: 80px; height: 80px;
+    background: #15B7A8;
+    border-radius: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(21,183,168,0.3);
+    animation: pulse 2s infinite;
+  }
+  .loading-logo svg { width: 48px; height: 48px; color: #fff; }
+  .loading-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: #15B7A8;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .loading-sub { font-size: 13px; color: #888; }
+  .loading-bar {
+    width: 140px; height: 4px;
+    background: rgba(21,183,168,0.15);
+    border-radius: 2px;
+    margin-top: 32px;
+    overflow: hidden;
+  }
+  .loading-bar-inner {
+    height: 100%; width: 0%;
+    background: #15B7A8;
+    border-radius: 2px;
+    animation: loadProgress 2.5s ease-in-out forwards;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes loadProgress {
+    0% { width: 0%; }
+    60% { width: 70%; }
+    100% { width: 100%; }
+  }
+
+  /* 页面切换 */
+  .page {
+    display: none;
+    min-height: 100%;
+    padding: 12px 16px 80px;
+    animation: fadeIn 0.3s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 子页面覆盖层 */
+  .sub-page {
+    position: absolute;
+    top: 44px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #E5F4F1;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .sub-page.open { transform: translateX(0); }
+
+  /* 子页面头部 */
+  .sub-page-header {
+    height: 56px;
+    background: #E5F4F1;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    flex-shrink: 0;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 20px;
+    background: rgba(21,183,168,0.1);
+    color: #15B7A8;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+  }
+  .back-btn:active { background: rgba(21,183,168,0.2); transform: scale(0.96); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .sub-page-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    scrollbar-width: none;
+  }
+  .sub-page-body::-webkit-scrollbar { display: none; }
+
+  /* 通用卡片 */
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.15s;
+  }
+  .card:active { transform: scale(0.98); }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title .more {
+    font-size: 13px;
+    color: #15B7A8;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* 按钮 */
+  .btn-primary {
+    background: #15B7A8;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary:active { background: #119e90; transform: scale(0.98); }
+  .btn-danger {
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .btn-danger:active { background: #ee5a5a; transform: scale(0.98); }
+
+  /* 标签 */
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tag-green { background: rgba(21,183,168,0.12); color: #15B7A8; }
+  .tag-orange { background: rgba(255,165,0,0.12); color: #e6a000; }
+  .tag-red { background: rgba(255,80,80,0.12); color: #e05050; }
+  .tag-yellow { background: rgba(255,200,50,0.15); color: #c49400; }
+
+  /* 列表项 */
+  .list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item:active { background: rgba(0,0,0,0.02); }
+  .list-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .list-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .list-text { font-size: 15px; color: #333; font-weight: 500; }
+  .list-arrow { color: #ccc; font-size: 14px; }
+
+  /* 顶部用户信息（我的页面） */
+  .profile-header {
+    background: #15B7A8;
+    margin: -12px -16px 16px;
+    padding: 40px 24px 24px;
+    color: #fff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+  }
+  .profile-name { font-size: 22px; font-weight: 700; }
+  .profile-sub { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  /* 输入框 */
+  .input-box {
+    width: 100%;
+    background: #f5f7fa;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-box:focus { border-color: #15B7A8; background: #fff; }
+
+  /* 打卡网格 */
+  .checkin-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .checkin-item {
+    background: #f8fafb;
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+  }
+  .checkin-item:active { transform: scale(0.95); }
+  .checkin-item.done { border-color: #15B7A8; background: rgba(21,183,168,0.06); }
+  .checkin-icon { font-size: 28px; margin-bottom: 6px; }
+  .checkin-label { font-size: 12px; color: #666; font-weight: 500; }
+  .checkin-item.done .checkin-label { color: #15B7A8; font-weight: 700; }
+
+  /* 任务复选框 */
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .task-check.done { background: #15B7A8; border-color: #15B7A8; }
+  .task-check.done::after {
+    content: "✓"; color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .task-text { font-size: 14px; color: #333; }
+  .task-text.done { text-decoration: line-through; color: #999; }
+
+  /* AI问答气泡 */
+  .chat-bubble {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .chat-bubble.ai { border-left: 3px solid #15B7A8; }
+  .chat-bubble.user { background: #15B7A8; color: #fff; border-left: none; }
+
+  /* 预警卡片特殊样式 */
+  .alert-card {
+    border-radius: 16px;
+    padding: 16px;
+    color: #fff;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .alert-card::before {
+    content: "";
+    position: absolute;
+    right: -20px; top: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .alert-red { background: #ff6b6b; }
+  .alert-orange { background: #ffa94d; }
+  .alert-yellow { background: #ffd43b; color: #5c4b00; }
+  .alert-green { background: #15B7A8; }
+  .alert-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; position: relative; z-index: 1; }
+  .alert-desc { font-size: 13px; opacity: 0.9; position: relative; z-index: 1; }
+
+  /* 紧急求助浮动按钮 */
+  .sos-float {
+    position: absolute;
+    right: 20px;
+    bottom: 84px;
+    width: 56px; height: 56px;
+    background: #ff6b6b;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(255,80,80,0.3);
+    cursor: pointer;
+    z-index: 400;
+    animation: sosPulse 2s infinite;
+  }
+  @keyframes sosPulse {
+    0%,100% { box-shadow: 0 4px 16px rgba(255,80,80,0.3); }
+    50% { box-shadow: 0 4px 24px rgba(255,80,80,0.5); }
+  }
+
+  /* 弹窗 */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1500;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.show { display: flex; opacity: 1; }
+  .modal-content {
+    background: #fff;
+    width: 100%;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 24px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .modal-overlay.show .modal-content { transform: translateY(0); }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .modal-btn {
+    width: 100%; padding: 14px; border-radius: 12px;
+    border: none; font-size: 16px; font-weight: 600;
+    margin-bottom: 10px; cursor: pointer;
+  }
+  .modal-btn-primary { background: #15B7A8; color: #fff; }
+  .modal-btn-danger { background: #ff6b6b; color: #fff; }
+  .modal-btn-default { background: #f5f5f5; color: #333; }
+
+  /* ===== AI问答大弹窗 ===== */
+  .chat-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1600;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .chat-modal-overlay.show { display: flex; opacity: 1; }
+  .chat-modal {
+    background: #E5F4F1;
+    width: 100%;
+    height: 88%;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden;
+  }
+  .chat-modal-overlay.show .chat-modal { transform: translateY(0); }
+  .chat-modal-header {
+    height: 56px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    flex-shrink: 0;
+  }
+  .chat-modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chat-close-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    transition: all 0.2s;
+    border: none;
+  }
+  .chat-close-btn:active { background: #e0e0e0; transform: scale(0.92); }
+  .chat-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    scrollbar-width: none;
+  }
+  .chat-modal-body::-webkit-scrollbar { display: none; }
+  .chat-modal-footer {
+    padding: 12px 16px 20px;
+    background: #fff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    flex-shrink: 0;
+  }
+
+  /* 图表占位 */
+  .chart-placeholder {
+    height: 160px;
+    background: #f8fafb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  /* 日期头部 */
+  .date-header {
+    font-size: 22px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  .date-sub {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 14px;
+  }
+
+  /* 用药项 */
+  .med-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #f8fafb;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .med-icon {
+    width: 40px; height: 40px;
+    background: rgba(21,183,168,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .med-info { flex: 1; }
+  .med-name { font-size: 14px; font-weight: 600; color: #333; }
+  .med-dose { font-size: 12px; color: #888; margin-top: 2px; }
+  .med-check {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .med-check.taken { background: #15B7A8; border-color: #15B7A8; }
+  .med-check.taken::after { content: "✓"; color: #fff; font-size: 14px; }
+
+  /* 档案页特殊 */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #888; }
+  .info-value { color: #333; font-weight: 600; }
+
+  /* 文章详情页 */
+  .article-cover {
+    width: 100%; height: 180px;
+    background: rgba(21,183,168,0.1);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px; margin-bottom: 16px;
+  }
+  .article-content {
+    font-size: 15px; color: #444; line-height: 1.8;
+  }
+  .article-content h3 {
+    font-size: 17px; font-weight: 700; color: #333;
+    margin: 20px 0 10px;
+  }
+  .article-content p {
+    margin-bottom: 12px;
+  }
+  .article-content ul {
+    padding-left: 20px; margin-bottom: 12px;
+  }
+  .article-content li {
+    margin-bottom: 6px;
+  }
+
+  /* 社群消息 */
+  .chat-msg {
+    display: flex; gap: 10px; margin-bottom: 14px;
+  }
+  .chat-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #15B7A8; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .chat-content {
+    background: #fff; border-radius: 12px;
+    padding: 10px 14px; font-size: 14px; color: #444;
+    line-height: 1.5; max-width: 240px;
+  }
+  .chat-name {
+    font-size: 12px; color: #888; margin-bottom: 4px;
+  }
+  .chat-input-bar {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 0;
+  }
+
+  /* 设置开关 */
+  .switch-row {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .switch-row:last-child { border-bottom: none; }
+  .switch-label { font-size: 15px; color: #333; font-weight: 500; }
+  .switch-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+  .switch-btn {
+    width: 48px; height: 28px;
+    border-radius: 14px;
+    background: #ddd;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .switch-btn.on { background: #15B7A8; }
+  .switch-btn::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.3s;
+  }
+  .switch-btn.on::after { transform: translateX(20px); }
+
+  /* 医生卡片 */
+  .doctor-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px;
+    background: #fff; border-radius: 16px;
+    margin-bottom: 12px;
+  }
+  .doctor-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(21,183,168,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .doctor-info { flex: 1; }
+  .doctor-name { font-size: 16px; font-weight: 700; color: #333; }
+  .doctor-title { font-size: 13px; color: #888; margin-top: 2px; }
+  .doctor-hospital { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  /* 情景应对卡片 */
+  .scenario-card {
+    background: #fff; border-radius: 16px;
+    padding: 16px; margin-bottom: 12px;
+    border-left: 4px solid #15B7A8;
+  }
+  .scenario-title {
+    font-size: 15px; font-weight: 700; color: #333;
+    margin-bottom: 8px;
+  }
+  .scenario-desc {
+    font-size: 13px; color: #666; line-height: 1.6;
+  }
+  .scenario-tip {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(21,183,168,0.06);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #15B7A8;
+    line-height: 1.5;
+  }
+
+  /* 音频资源 */
+  .audio-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    background: #f8fafb; border-radius: 12px;
+    margin-bottom: 8px; cursor: pointer;
+  }
+  .audio-item:active { background: #f0f0f0; }
+  .audio-play {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #15B7A8; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .audio-info { flex: 1; }
+  .audio-title { font-size: 14px; font-weight: 600; color: #333; }
+  .audio-duration { font-size: 12px; color: #888; margin-top: 2px; }
+
+  /* 分类标签容器 - 隐藏滚动条但保持拖拽 */
+  .category-scroll {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    cursor: grab;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .category-scroll::-webkit-scrollbar { display: none; }
+  .category-scroll:active { cursor: grabbing; }
+  .category-scroll .tag {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 88px;
+    text-align: center;
+  }
+  .category-scroll .tag:active { transform: scale(0.95); }
+
+  /* 文章操作栏 */
+  .article-actions {
+    display: flex;
+    gap: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  .article-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #f5f5f5;
+    transition: all 0.2s;
+  }
+  .article-action-btn:active { background: #e8e8e8; transform: scale(0.96); }
+  .article-action-btn.active { color: #ff6b6b; background: rgba(255,80,80,0.08); }
+
+  /* 字体大小选择器 */
+  .font-size-slider {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    gap: 8px;
+  }
+  .font-size-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .font-size-dot.active {
+    background: #15B7A8;
+    transform: scale(1.3);
+  }
+  .font-size-dot::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+  }
+  .font-size-line {
+    flex: 1;
+    height: 3px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    position: relative;
+  }
+  .font-size-fill {
+    height: 100%;
+    background: #15B7A8;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .font-preview {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f8fafb;
+    border-radius: 12px;
+    transition: all 0.3s;
+  }
+  .font-preview-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #444;
+    transition: font-size 0.3s;
+  }
+
+  /* 家庭成员 */
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .member-item:last-child { border-bottom: none; }
+  .member-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .member-info { flex: 1; }
+  .member-name { font-size: 15px; font-weight: 600; color: #333; }
+  .member-role { font-size: 12px; color: #888; }
+  .member-status {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(21,183,168,0.1);
+    color: #15B7A8;
+  }
+
+  /* 医生管理 */
+  .doctor-manage-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafb;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .doctor-manage-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(21,183,168,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .doctor-manage-info { flex: 1; }
+  .doctor-manage-name { font-size: 15px; font-weight: 600; color: #333; }
+  .doctor-manage-desc { font-size: 12px; color: #888; margin-top: 2px; }
+  .doctor-manage-delete {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,80,80,0.1);
+    color: #ff6b6b;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .doctor-manage-delete:active { background: rgba(255,80,80,0.2); }
+
+  /* 打卡详情页 */
+  .checkin-detail-header {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .checkin-detail-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+  }
+  .checkin-detail-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #333;
+  }
+  .checkin-detail-status {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .form-label-sub {
+    font-size: 13px;
+    color: #888;
+    font-weight: 400;
+    margin-left: 6px;
+  }
+  .option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .option-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #e0e0e0;
+    background: #fff;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .option-btn:active { transform: scale(0.96); }
+  .option-btn.selected {
+    border-color: #15B7A8;
+    background: rgba(21,183,168,0.08);
+    color: #15B7A8;
+    font-weight: 600;
+  }
+  .slider-group {
+    padding: 10px 0;
+  }
+  .slider-group input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+  }
+  .slider-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px; height: 24px;
+    background: #15B7A8;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(21,183,168,0.3);
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+  }
+  .mood-emoji-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+  }
+  .mood-emoji {
+    font-size: 32px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.2s;
+    filter: grayscale(0.6);
+    text-align: center;
+  }
+  .mood-emoji:active { transform: scale(0.9); }
+  .mood-emoji.selected {
+    opacity: 1;
+    filter: grayscale(0);
+    transform: scale(1.15);
+  }
+  .mood-emoji-label {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .textarea-box {
+    width: 100%;
+    min-height: 80px;
+    background: #f5f7fa;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .textarea-box:focus { border-color: #15B7A8; background: #fff; }
+  .time-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .time-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: #f5f7fa;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 10px;
+    font-size: 15px;
+    text-align: center;
+    outline: none;
+  }
+  .time-input:focus { border-color: #15B7A8; background: #fff; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .check-box.checked {
+    background: #15B7A8;
+    border-color: #15B7A8;
+  }
+  .check-box.checked::after {
+    content: "✓";
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .check-text { font-size: 14px; color: #444; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+
+  <!-- Loading -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="loading-text">守护星</div>
+    <div class="loading-sub">家属支持 · 全程守护</div>
+    <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+  </div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span>5G</span>
+    <span class="time" id="clock">09:41</span>
+    <span>🔋 100%</span>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="app-body" id="appBody">
+
+    <!-- 顶部导航栏 -->
+    <div class="main-header" id="mainHeader">
+      <div class="header-avatar" onclick="openPage('patientProfile')" title="患者档案">李</div>
+      <div class="header-title" id="headerTitle">今天</div>
+      <div class="header-notify" onclick="openPage('notifications')">
+        🔔
+        <span class="badge">2</span>
+      </div>
+    </div>
+
+    <!-- ===== 今天 ===== -->
+    <div class="page active" id="page-today">
+      <div class="date-sub">5月5日 星期一</div>
+
+      <!-- 状态概览 -->
+      <div class="card">
+        <div class="card-title">
+          <span>今日状态概览</span>
+          <span class="tag tag-green">连续记录 12 天</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center;">
+          <div>
+            <div style="font-size:24px;">😴</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">睡眠</div>
+            <div style="font-size:13px;font-weight:600;color:#15B7A8;">7.5h</div>
+          </div>
+          <div>
+            <div style="font-size:24px;">🍽️</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">饮食</div>
+            <div style="font-size:13px;font-weight:600;color:#15B7A8;">正常</div>
+          </div>
+          <div>
+            <div style="font-size:24px;">💊</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">服药</div>
+            <div style="font-size:13px;font-weight:600;color:#15B7A8;">已服</div>
+          </div>
+          <div>
+            <div style="font-size:24px;">😊</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">情绪</div>
+            <div style="font-size:13px;font-weight:600;color:#ffa94d;">平稳</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 预警卡片 -->
+      <div class="alert-card alert-green">
+        <div class="alert-title">🛡️ 当前状态安全</div>
+        <div class="alert-desc">各项指标稳定，继续保持观察和记录。</div>
+      </div>
+
+      <!-- AI问答 -->
+      <div class="card" onclick="openChatModal()" style="cursor:pointer;">
+        <div class="card-title">
+          <span>🤖 AI智能问答</span>
+          <span class="more">点击咨询 ></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="flex:1;background:#f5f7fa;border-radius:10px;padding:10px 14px;font-size:14px;color:#888;">点击输入症状或提问...</div>
+          <div style="width:36px;height:36px;background:#15B7A8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">🎙️</div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="tag tag-green" style="cursor:pointer;" onclick="event.stopPropagation();">最近睡眠变化</span>
+          <span class="tag tag-green" style="cursor:pointer;" onclick="event.stopPropagation();">药物副作用</span>
+          <span class="tag tag-green" style="cursor:pointer;" onclick="event.stopPropagation();">情绪波动</span>
+        </div>
+      </div>
+
+      <!-- 今日任务 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 今日任务清单</span>
+          <span class="more" onclick="showToast('任务管理功能开发中')">管理 ></span>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+          <div class="task-check"></div>
+          <div class="task-text">早饭后服用奥氮平 5mg</div>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+          <div class="task-check done"></div>
+          <div class="task-text done">记录今日睡眠情况</div>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+          <div class="task-check"></div>
+          <div class="task-text">下午陪同散步30分钟</div>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+          <div class="task-check"></div>
+          <div class="task-text">预约下周三复诊号</div>
+        </div>
+      </div>
+
+      <!-- 风险评估 -->
+      <div class="card" onclick="openPage('riskAssessment')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>📊 今日风险评估</span>
+          <span class="more">查看详情 ></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:64px;height:64px;background:rgba(21,183,168,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:20px;font-weight:800;color:#15B7A8;">82</span>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#333;">综合评分：良好</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">睡眠质量、服药依从性表现优秀</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 就医引导 -->
+      <div class="card" onclick="openPage('medicalGuide')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>🏥 就医引导</span>
+          <span class="more">></span>
+        </div>
+        <div style="font-size:13px;color:#666;line-height:1.6;">
+          根据当前数据，建议继续观察。如需帮助，可选择线上问诊或联系主治医生。
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 记录 ===== -->
+    <div class="page" id="page-record">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div>
+          <div class="date-header">记录</div>
+          <div class="date-sub">每日打卡与健康管理</div>
+        </div>
+        <div class="header-notify" style="position:static;" onclick="showToast('日历功能开发中')">📅</div>
+      </div>
+
+      <!-- 每日打卡 -->
+      <div class="card">
+        <div class="card-title">
+          <span>每日打卡</span>
+          <span class="tag tag-green" id="checkinCount">6/7 已完成</span>
+        </div>
+        <div class="checkin-grid">
+          <div class="checkin-item done" onclick="openCheckinDetail('sleep', this)">
+            <div class="checkin-icon">😴</div>
+            <div class="checkin-label">睡眠</div>
+          </div>
+          <div class="checkin-item done" onclick="openCheckinDetail('mood', this)">
+            <div class="checkin-icon">😊</div>
+            <div class="checkin-label">情绪</div>
+          </div>
+          <div class="checkin-item" onclick="openCheckinDetail('social', this)">
+            <div class="checkin-icon">👥</div>
+            <div class="checkin-label">社交</div>
+          </div>
+          <div class="checkin-item done" onclick="openCheckinDetail('med', this)">
+            <div class="checkin-icon">💊</div>
+            <div class="checkin-label">服药</div>
+          </div>
+          <div class="checkin-item done" onclick="openCheckinDetail('physical', this)">
+            <div class="checkin-icon">💪</div>
+            <div class="checkin-label">身体</div>
+          </div>
+          <div class="checkin-item" onclick="openCheckinDetail('observe', this)">
+            <div class="checkin-icon">👁️</div>
+            <div class="checkin-label">观察</div>
+          </div>
+          <div class="checkin-item done" onclick="openCheckinDetail('selfeval', this)">
+            <div class="checkin-icon">❤️</div>
+            <div class="checkin-label">自评</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用药管理 -->
+      <div class="card">
+        <div class="card-title">
+          <span>今日用药</span>
+          <span class="more" onclick="openPage('medManage');event.stopPropagation();">管理 ></span>
+        </div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">奥氮平</div>
+            <div class="med-dose">5mg · 早饭后 · 口服</div>
+          </div>
+          <div class="med-check taken" onclick="toggleMed(this);event.stopPropagation();"></div>
+        </div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">盐酸舍曲林</div>
+            <div class="med-dose">50mg · 晚饭后 · 口服</div>
+          </div>
+          <div class="med-check" onclick="toggleMed(this);event.stopPropagation();"></div>
+        </div>
+      </div>
+
+      <!-- AI分析报告 -->
+      <div class="card" onclick="showToast('AI分析报告详情开发中')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>📈 AI分析报告</span>
+          <span class="more">查看 ></span>
+        </div>
+        <div style="font-size:13px;color:#666;line-height:1.6;margin-bottom:10px;">
+          基于最近7天数据，患者的睡眠质量呈上升趋势，情绪波动较小，服药依从性保持在95%以上。
+        </div>
+        <div class="chart-placeholder">
+          📊 趋势图示意区域
+        </div>
+      </div>
+
+      <!-- 照护笔记 -->
+      <div class="card" onclick="showToast('照护笔记开发中')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>📝 照护笔记</span>
+          <span class="more">></span>
+        </div>
+        <div style="font-size:13px;color:#888;">今天还没有记录，点击添加...</div>
+      </div>
+
+      <!-- 状态趋势 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📉 状态趋势</span>
+          <span class="tag tag-green">近7天</span>
+        </div>
+        <div class="chart-placeholder">
+          📈 多维度状态趋势图
+        </div>
+        <div style="display:flex;justify-content:space-around;margin-top:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:#15B7A8;">95%</div>
+            <div style="font-size:11px;color:#888;">服药依从</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:#15B7A8;">7.2h</div>
+            <div style="font-size:11px;color:#888;">平均睡眠</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:#ffa94d;">2次</div>
+            <div style="font-size:11px;color:#888;">情绪波动</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top:8px;background:#fff;color:#15B7A8;border:1px solid rgba(21,183,168,0.2);" onclick="showModal('exportData')">
+        📤 导出数据
+      </button>
+    </div>
+
+    <!-- ===== 学一学 ===== -->
+    <div class="page" id="page-learn">
+      <div class="date-header">学一学</div>
+      <div class="date-sub">知识库与家属支持</div>
+
+      <div class="input-box" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:#999;">
+        🔍 搜索疾病知识、护理技巧...
+      </div>
+
+      <!-- 分类标签 -->
+      <div class="category-scroll" id="categoryScroll">
+        <span class="tag tag-green" data-cat="all" onclick="switchCategory(this,'all')">全部</span>
+        <span class="tag" style="background:#f0f0f0;color:#666;" data-cat="科普" onclick="switchCategory(this,'科普')">疾病科普</span>
+        <span class="tag" style="background:#f0f0f0;color:#666;" data-cat="护理" onclick="switchCategory(this,'护理')">护理指南</span>
+        <span class="tag" style="background:#f0f0f0;color:#666;" data-cat="预防" onclick="switchCategory(this,'预防')">复发预防</span>
+        <span class="tag" style="background:#f0f0f0;color:#666;" data-cat="康复" onclick="switchCategory(this,'康复')">康复支持</span>
+      </div>
+
+      <div id="articleList">
+      <div id="articleCards">
+      <div class="card" onclick="openPage('articleDetail')" style="cursor:pointer;">
+        <div style="display:flex;gap:12px;">
+          <div style="width:80px;height:80px;background:rgba(21,183,168,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;">📖</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">精神分裂症的早期识别信号</div>
+            <div style="font-size:12px;color:#888;line-height:1.5;">了解疾病复发的早期征兆，帮助家属及时发现问题并采取措施...</div>
+            <div style="margin-top:8px;">
+              <span class="tag tag-green" style="font-size:11px;">疾病科普</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" onclick="openPage('articleDetail')" style="cursor:pointer;">
+        <div style="display:flex;gap:12px;">
+          <div style="width:80px;height:80px;background:rgba(255,165,0,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;">💡</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">如何与患者有效沟通</div>
+            <div style="font-size:12px;color:#888;line-height:1.5;">掌握正确的沟通技巧，避免刺激患者情绪，建立信任关系...</div>
+            <div style="margin-top:8px;">
+              <span class="tag tag-orange" style="font-size:11px;">护理指南</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" onclick="openPage('articleDetail')" style="cursor:pointer;">
+        <div style="display:flex;gap:12px;">
+          <div style="width:80px;height:80px;background:rgba(255,80,80,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;">🛡️</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">药物依从性管理指南</div>
+            <div style="font-size:12px;color:#888;line-height:1.5;">帮助患者坚持服药的实用策略，应对拒药、藏药等情况...</div>
+            <div style="margin-top:8px;">
+              <span class="tag tag-red" style="font-size:11px;">复发预防</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div><!-- /articleCards -->
+      <!-- 家属社群入口 -->
+      <div class="card" onclick="openPage('community')" style="cursor:pointer;background:#15B7A8;color:#fff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">👥 家属互助社群</div>
+            <div style="font-size:13px;opacity:0.9;">128位家属正在交流经验</div>
+          </div>
+          <div style="font-size:24px;">→</div>
+        </div>
+      </div>
+
+      <!-- 情景应对 -->
+      <div class="card" onclick="openPage('scenarioGuide')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>🎭 情景应对指南</span>
+          <span class="more">></span>
+        </div>
+        <div style="font-size:13px;color:#666;">拒绝服药、情绪激动、社交退缩...应对话术与行为建议</div>
+      </div>
+
+      <!-- 心理支持 -->
+      <div class="card" onclick="openPage('psychSupport')" style="cursor:pointer;">
+        <div class="card-title">
+          <span>🌿 心理支持资源</span>
+          <span class="more">></span>
+        </div>
+        <div style="font-size:13px;color:#666;">家属喘息服务、心理咨询热线、减压音频...</div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ===== 我的 ===== -->
+    <div class="page" id="page-profile">
+      <div class="profile-header">
+        <div class="profile-name">张家属</div>
+        <div class="profile-sub">患者：李明 · 精神分裂症 · 稳定期</div>
+      </div>
+
+      <!-- 快捷信息卡 -->
+      <div class="card" style="margin-top:-10px;position:relative;z-index:2;">
+        <div style="display:flex;justify-content:space-around;text-align:center;">
+          <div>
+            <div style="font-size:20px;font-weight:800;color:#15B7A8;">12</div>
+            <div style="font-size:12px;color:#888;">连续记录(天)</div>
+          </div>
+          <div>
+            <div style="font-size:20px;font-weight:800;color:#15B7A8;">95%</div>
+            <div style="font-size:12px;color:#888;">服药依从</div>
+          </div>
+          <div>
+            <div style="font-size:20px;font-weight:800;color:#15B7A8;">3</div>
+            <div style="font-size:12px;color:#888;">复诊记录</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 医生入口 -->
+      <div class="card">
+        <div class="card-title">🏥 医生/问诊入口</div>
+        <div class="list-item" onclick="openPage('doctorDetail')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">👨‍⚕️</div>
+            <div class="list-text">主治医生联系方式</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('onlineConsult')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">💬</div>
+            <div class="list-text">图文问诊</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('doctorAuth')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">🔑</div>
+            <div class="list-text">医生协作授权</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('doctorManage')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">⚙️</div>
+            <div class="list-text">管理医生</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+
+      <!-- 家庭共享 -->
+      <div class="card">
+        <div class="card-title">👨‍👩‍👧 家庭共享协作</div>
+        <div class="list-item" onclick="showToast('权限设置')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">🔒</div>
+            <div class="list-text">权限设置</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('familyManage')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">👥</div>
+            <div class="list-text">家庭成员管理</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+
+      <!-- 设置 -->
+      <div class="card">
+        <div class="card-title">⚙️ 设置</div>
+        <div class="list-item" onclick="openPage('settingsNotify')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(100,149,237,0.1);">🔔</div>
+            <div class="list-text">通知设置</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('settingsPrivacy')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(100,149,237,0.1);">🔏</div>
+            <div class="list-text">隐私与数据</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('settingsTheme')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(100,149,237,0.1);">🎨</div>
+            <div class="list-text">主题与字体</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="openPage('settingsAccessibility')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(100,149,237,0.1);">♿</div>
+            <div class="list-text">无障碍模式</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+
+      <button class="btn-danger" style="margin-top:8px;background:#fff;color:#ff6b6b;border:1px solid rgba(255,80,80,0.2);" onclick="showModal('logout')">
+        退出登录
+      </button>
+    </div>
+  </div>
+
+  <!-- 紧急求助浮动按钮（仅在「今天」显示） -->
+  <div class="sos-float" id="sosBtn" onclick="showModal('sos')">🆘</div>
+
+  <!-- 底部Tab -->
+  <div class="tab-bar">
+    <div class="tab-item active" data-tab="today" onclick="switchTab('today')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>今天</span>
+    </div>
+    <div class="tab-item" data-tab="record" onclick="switchTab('record')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <span>记录</span>
+    </div>
+    <div class="tab-item" data-tab="learn" onclick="switchTab('learn')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+      <span>学一学</span>
+    </div>
+    <div class="tab-item" data-tab="profile" onclick="switchTab('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+  <!-- ===== 子页面 ===== -->
+
+  <!-- 患者档案 -->
+  <div class="sub-page" id="page-patientProfile">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('patientProfile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+    </div>
+    <div class="sub-page-body">
+      <div class="card" style="text-align:center;padding:24px 16px;">
+        <div style="width:72px;height:72px;background:#15B7A8;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#fff;font-size:28px;font-weight:700;">李</div>
+        <div style="font-size:18px;font-weight:700;color:#333;">李明</div>
+        <div style="font-size:13px;color:#888;margin-top:4px;">男 · 28岁 · 患者</div>
+        <div style="margin-top:10px;">
+          <span class="tag tag-green">稳定期</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">基本信息</div>
+        <div class="info-row"><span class="info-label">姓名</span><span class="info-value">李明</span></div>
+        <div class="info-row"><span class="info-label">性别</span><span class="info-value">男</span></div>
+        <div class="info-row"><span class="info-label">年龄</span><span class="info-value">28岁</span></div>
+        <div class="info-row"><span class="info-label">身高/体重</span><span class="info-value">175cm / 70kg</span></div>
+        <div class="info-row"><span class="info-label">过敏史</span><span class="info-value">无</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">诊断信息</div>
+        <div class="info-row"><span class="info-label">主要诊断</span><span class="info-value">精神分裂症</span></div>
+        <div class="info-row"><span class="info-label">分型</span><span class="info-value">偏执型</span></div>
+        <div class="info-row"><span class="info-label">确诊时间</span><span class="info-value">2023-08-15</span></div>
+        <div class="info-row"><span class="info-label">当前分期</span><span class="info-value">稳定期（维持治疗）</span></div>
+        <div class="info-row"><span class="info-label">主治医生</span><span class="info-value">王主任 · 精神科</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">用药记录</div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">奥氮平（再普乐）</div>
+            <div class="med-dose">5mg · 每日1次 · 早饭后</div>
+          </div>
+        </div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">盐酸舍曲林（左洛复）</div>
+            <div class="med-dose">50mg · 每日1次 · 晚饭后</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">监测历史</div>
+        <div class="info-row"><span class="info-label">血常规</span><span class="info-value">2026-04-01 正常</span></div>
+        <div class="info-row"><span class="info-label">肝功能</span><span class="info-value">2026-04-01 正常</span></div>
+        <div class="info-row"><span class="info-label">心电图</span><span class="info-value">2026-02-15 正常</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">就医记录</div>
+        <div style="font-size:14px;color:#666;line-height:1.6;">
+          最近一次复诊：2026-04-20<br>
+          下次建议复诊：2026-06-20<br>
+          就诊医院：市精神卫生中心
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 风险评估 -->
+  <div class="sub-page" id="page-riskAssessment">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('riskAssessment')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">风险评估详情</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="width:100px;height:100px;background:rgba(21,183,168,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+            <span style="font-size:32px;font-weight:800;color:#15B7A8;">82</span>
+          </div>
+          <div style="font-size:16px;font-weight:700;color:#333;margin-top:12px;">综合评分：良好</div>
+          <div style="font-size:13px;color:#888;margin-top:4px;">评估时间：2026-05-05 08:30</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">各维度得分</div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;"><span>睡眠质量</span><span style="font-weight:700;color:#15B7A8;">85分</span></div>
+          <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="width:85%;height:100%;background:#15B7A8;border-radius:4px;"></div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;"><span>服药依从性</span><span style="font-weight:700;color:#15B7A8;">95分</span></div>
+          <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="width:95%;height:100%;background:#15B7A8;border-radius:4px;"></div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;"><span>情绪稳定性</span><span style="font-weight:700;color:#ffa94d;">78分</span></div>
+          <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="width:78%;height:100%;background:#ffa94d;border-radius:4px;"></div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;"><span>社交活动</span><span style="font-weight:700;color:#15B7A8;">82分</span></div>
+          <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="width:82%;height:100%;background:#15B7A8;border-radius:4px;"></div></div>
+        </div>
+      </div>
+      <div class="alert-card alert-green">
+        <div class="alert-title">✅ 当前风险等级：绿色（安全）</div>
+        <div class="alert-desc">各项指标均在可控范围内，请继续保持当前照护方案。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 就医引导 -->
+  <div class="sub-page" id="page-medicalGuide">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('medicalGuide')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">就医引导</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="alert-card alert-green">
+        <div class="alert-title">当前建议：继续观察</div>
+        <div class="alert-desc">根据近期数据趋势，患者状态稳定，暂无需紧急就医。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">可选择处理方式</div>
+        <div class="list-item" onclick="showToast('已记录：继续观察')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">👁️</div>
+            <div class="list-text">继续观察</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="closePage('medicalGuide');switchTab('profile');openPage('doctorDetail')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">📞</div>
+            <div class="list-text">联系主治医生</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="closePage('medicalGuide');switchTab('profile');openPage('onlineConsult')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">💻</div>
+            <div class="list-text">线上问诊</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showModal('emergencyConfirm')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,80,80,0.1);">🚨</div>
+            <div class="list-text">立即就医（急诊）</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用药管理 -->
+  <div class="sub-page" id="page-medManage">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('medManage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">用药管理</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">当前用药方案</div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">奥氮平（再普乐）</div>
+            <div class="med-dose">5mg · 每日1次 · 早饭后 · 口服</div>
+            <div class="med-dose">开始日期：2026-01-15</div>
+          </div>
+        </div>
+        <div class="med-item">
+          <div class="med-icon">💊</div>
+          <div class="med-info">
+            <div class="med-name">盐酸舍曲林（左洛复）</div>
+            <div class="med-dose">50mg · 每日1次 · 晚饭后 · 口服</div>
+            <div class="med-dose">开始日期：2026-02-20</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">副作用记录</div>
+        <div style="font-size:14px;color:#666;line-height:1.6;">
+          近期记录：轻度口干（3天前）、食欲增加（持续）
+        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="showToast('打开副作用记录表单')">
+          + 记录副作用
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-title">复查提醒</div>
+        <div style="font-size:14px;color:#666;">
+          下次复查项目：血常规、肝功能、心电图<br>
+          建议时间：每3个月一次，下次预计2026年6月
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 学一学子页面 ===== -->
+
+  <!-- 文章详情 -->
+  <div class="sub-page" id="page-articleDetail">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('articleDetail')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">文章详情</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="article-cover">📖</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="font-size:18px;font-weight:800;color:#333;margin-bottom:8px;flex:1;">精神分裂症的早期识别信号</div>
+          <div style="display:flex;gap:10px;">
+            <span id="favBtn" style="font-size:22px;cursor:pointer;" onclick="event.stopPropagation();toggleFav(this)">🤍</span>
+            <span style="font-size:22px;cursor:pointer;" onclick="event.stopPropagation();showToast('分享链接已复制')">📤</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <span class="tag tag-green">疾病科普</span>
+          <span style="font-size:12px;color:#aaa;">阅读 2,341 · 收藏 156</span>
+        </div>
+        <div class="article-content">
+          <p>精神分裂症是一种严重的精神障碍，早期识别和干预对于改善预后至关重要。作为家属，了解疾病的早期信号可以帮助您及时发现问题并寻求专业帮助。</p>
+          <h3>🔍 常见早期信号</h3>
+          <ul>
+            <li><strong>社交退缩：</strong>逐渐减少与亲友的交往，回避社交场合</li>
+            <li><strong>情绪变化：</strong>情绪波动大，或表现为情感淡漠</li>
+            <li><strong>睡眠紊乱：</strong>失眠或嗜睡，昼夜节律颠倒</li>
+            <li><strong>言语异常：</strong>说话逻辑混乱，或突然变得沉默寡言</li>
+            <li><strong>行为怪异：</strong>出现不合时宜的行为或动作</li>
+          </ul>
+          <h3>💡 家属应对建议</h3>
+          <p>发现上述信号时，不要惊慌，也不要责备患者。建议：</p>
+          <ul>
+            <li>保持冷静，记录观察到的具体表现</li>
+            <li>温和地与患者沟通，表达关心而非指责</li>
+            <li>及时联系精神科医生进行评估</li>
+            <li>避免自行判断或延误就医</li>
+          </ul>
+          <p style="color:#888;font-size:13px;margin-top:16px;">本文仅供参考，不能替代专业医疗建议。如有疑问请咨询专业医生。</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💬 相关讨论</div>
+        <div style="font-size:13px;color:#888;">暂无评论，快来发表您的看法吧</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 家属社群 -->
+  <div class="sub-page" id="page-community">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('community')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">家属互助社群</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card" style="background:#15B7A8;color:#fff;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px;">👥 守护星家属社群</div>
+        <div style="font-size:13px;opacity:0.9;">128位家属 · 今日新增 6 条消息</div>
+      </div>
+      <div class="card">
+        <div class="chat-msg">
+          <div class="chat-avatar">王</div>
+          <div>
+            <div class="chat-name">王妈妈 · 2小时前</div>
+            <div class="chat-content">最近孩子服药很配合，睡眠质量也好了很多，感谢大家的建议！</div>
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar" style="background:#ffa94d;">李</div>
+          <div>
+            <div class="chat-name">李爸爸 · 3小时前</div>
+            <div class="chat-content">请问大家，患者最近总是说听到有人叫他名字，这是复发的前兆吗？</div>
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar" style="background:#ff6b6b;">张</div>
+          <div>
+            <div class="chat-name">张阿姨 · 5小时前</div>
+            <div class="chat-content">@李爸爸 建议尽快联系主治医生，幻听加重需要及时调整用药。</div>
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar" style="background:#74c0fc;">陈</div>
+          <div>
+            <div class="chat-name">陈叔叔 · 昨天</div>
+            <div class="chat-content">分享一篇关于家庭支持的好文章，希望对大家有帮助～</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <input class="input-box" style="flex:1;" placeholder="分享您的经验或提问...">
+        <div style="width:40px;height:40px;background:#15B7A8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:18px;">➤</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 情景应对 -->
+  <div class="sub-page" id="page-scenarioGuide">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('scenarioGuide')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">情景应对指南</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="scenario-card">
+        <div class="scenario-title">💊 患者拒绝服药</div>
+        <div class="scenario-desc">患者可能因副作用、病识感缺乏或情绪问题而拒绝服药。不要强行灌药或争吵。</div>
+        <div class="scenario-tip">
+          <strong>应对建议：</strong><br>
+          1. 温和询问拒绝原因，倾听患者感受<br>
+          2. 与医生沟通调整用药方案或剂型<br>
+          3. 建立服药仪式感（如固定时间、搭配温水）<br>
+          4. 必要时寻求社区精防医生上门协助
+        </div>
+      </div>
+      <div class="scenario-card" style="border-left-color:#ffa94d;">
+        <div class="scenario-title">😤 患者情绪激动</div>
+        <div class="scenario-desc">患者可能因幻觉、妄想或压力而突然情绪激动、大喊大叫。</div>
+        <div class="scenario-tip" style="background:rgba(255,165,0,0.06);color:#e6a000;">
+          <strong>应对建议：</strong><br>
+          1. 保持冷静，不要与患者争辩或反驳<br>
+          2. 降低环境刺激（声音、光线、人群）<br>
+          3. 用简短、温和的语句安抚<br>
+          4. 如持续超过30分钟或出现暴力倾向，立即联系医生或报警
+        </div>
+      </div>
+      <div class="scenario-card" style="border-left-color:#ff6b6b;">
+        <div class="scenario-title">🏠 患者社交退缩</div>
+        <div class="scenario-desc">患者长期闭门不出、拒绝与外界接触，可能导致社会功能退化。</div>
+        <div class="scenario-tip" style="background:rgba(255,80,80,0.05);color:#e05050;">
+          <strong>应对建议：</strong><br>
+          1. 从低强度社交开始（如家庭聚餐、短距离散步）<br>
+          2. 尊重患者节奏，不强迫社交<br>
+          3. 鼓励参与简单的家务或兴趣活动<br>
+          4. 配合康复训练，逐步恢复社会功能
+        </div>
+      </div>
+      <div class="scenario-card" style="border-left-color:#74c0fc;">
+        <div class="scenario-title">🗣️ 患者表达被害妄想</div>
+        <div class="scenario-desc">患者坚信有人要害他/她，可能伴随恐惧、警惕或攻击行为。</div>
+        <div class="scenario-tip" style="background:rgba(116,192,252,0.06);color:#4a90d9;">
+          <strong>应对建议：</strong><br>
+          1. 不要否定患者的感受（"你想多了"），而是共情（"听起来你很害怕"）<br>
+          2. 陪伴在患者身边，让其感到安全<br>
+          3. 转移注意力到具体活动上<br>
+          4. 记录症状变化，及时反馈给医生调整药物
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 心理支持 -->
+  <div class="sub-page" id="page-psychSupport">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('psychSupport')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">心理支持资源</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">📞 心理咨询热线</div>
+        <div class="list-item" onclick="showToast('正在拨打 400-xxx-xxxx')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,80,80,0.1);">📞</div>
+            <div class="list-text">全国心理援助热线</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showToast('正在拨打 400-xxx-xxxx')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">📞</div>
+            <div class="list-text">家属专属咨询热线</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎵 减压音频</div>
+        <div class="audio-item" onclick="showToast('开始播放：正念呼吸引导')">
+          <div class="audio-play">▶</div>
+          <div class="audio-info">
+            <div class="audio-title">正念呼吸引导</div>
+            <div class="audio-duration">10分钟 · 缓解焦虑</div>
+          </div>
+        </div>
+        <div class="audio-item" onclick="showToast('开始播放：渐进式肌肉放松')">
+          <div class="audio-play">▶</div>
+          <div class="audio-info">
+            <div class="audio-title">渐进式肌肉放松</div>
+            <div class="audio-duration">15分钟 · 改善睡眠</div>
+          </div>
+        </div>
+        <div class="audio-item" onclick="showToast('开始播放：睡前冥想')">
+          <div class="audio-play">▶</div>
+          <div class="audio-info">
+            <div class="audio-title">睡前冥想</div>
+            <div class="audio-duration">20分钟 · 助眠安神</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌸 家属喘息服务</div>
+        <div style="font-size:14px;color:#666;line-height:1.6;">
+          长期照护患者对家属身心都是巨大挑战。喘息服务为您提供临时 relief：<br><br>
+          • 日间照料中心托管（工作日 8:00-18:00）<br>
+          • 短期住院替代照护（3-7天）<br>
+          • 志愿者上门陪伴服务<br>
+          • 家属互助小组定期聚会
+        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="showToast('正在查询附近服务...')">
+          查询附近服务
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 医生管理 -->
+  <div class="sub-page" id="page-doctorManage">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('doctorManage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">管理医生</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">👨‍⚕️ 已关联医生</div>
+        <div class="doctor-manage-item">
+          <div class="doctor-manage-avatar">👨‍⚕️</div>
+          <div class="doctor-manage-info">
+            <div class="doctor-manage-name">王建国 主任医师</div>
+            <div class="doctor-manage-desc">市精神卫生中心 · 精神科</div>
+          </div>
+          <div class="doctor-manage-delete" onclick="showToast('已移除医生')">✕</div>
+        </div>
+        <div class="doctor-manage-item">
+          <div class="doctor-manage-avatar" style="background:rgba(255,165,0,0.1);">👩‍⚕️</div>
+          <div class="doctor-manage-info">
+            <div class="doctor-manage-name">李芳 副主任医师</div>
+            <div class="doctor-manage-desc">社区精防医生 · 随访</div>
+          </div>
+          <div class="doctor-manage-delete" onclick="showToast('已移除医生')">✕</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">➕ 添加医生</div>
+        <div style="font-size:14px;color:#666;margin-bottom:12px;">输入医生的姓名或工号进行搜索</div>
+        <div style="display:flex;gap:8px;">
+          <input class="input-box" style="flex:1;" placeholder="医生姓名/工号">
+          <div style="width:44px;height:44px;background:#15B7A8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:18px;">🔍</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 家庭成员管理 -->
+  <div class="sub-page" id="page-familyManage">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('familyManage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">家庭成员</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">👨‍👩‍👧 当前成员</div>
+        <div class="member-item">
+          <div class="member-avatar" style="background:#15B7A8;">张</div>
+          <div class="member-info">
+            <div class="member-name">张家属（我）</div>
+            <div class="member-role">主要照护者 · 管理员</div>
+          </div>
+          <span class="member-status">在线</span>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background:#ffa94d;">王</div>
+          <div class="member-info">
+            <div class="member-name">王妈妈</div>
+            <div class="member-role">患者母亲 · 可查看</div>
+          </div>
+          <span class="member-status">在线</span>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background:#74c0fc;">李</div>
+          <div class="member-info">
+            <div class="member-name">李叔叔</div>
+            <div class="member-role">患者舅舅 · 仅查看</div>
+          </div>
+          <span class="member-status" style="background:#f0f0f0;color:#888;">离线</span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showToast('邀请链接已生成')">
+        + 邀请家庭成员
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 我的子页面 ===== -->
+
+  <!-- 医生详情 -->
+  <div class="sub-page" id="page-doctorDetail">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('doctorDetail')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">主治医生</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="doctor-card">
+        <div class="doctor-avatar">👨‍⚕️</div>
+        <div class="doctor-info">
+          <div class="doctor-name">王建国 主任医师</div>
+          <div class="doctor-title">精神科 · 精神分裂症专科</div>
+          <div class="doctor-hospital">市精神卫生中心 · 门诊三楼</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 出诊信息</div>
+        <div class="info-row"><span class="info-label">门诊时间</span><span class="info-value">周二、周四上午</span></div>
+        <div class="info-row"><span class="info-label">挂号方式</span><span class="info-value">医院APP/现场挂号</span></div>
+        <div class="info-row"><span class="info-label">下次复诊</span><span class="info-value">2026-05-20</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📞 联系方式</div>
+        <div class="list-item" onclick="showToast('正在拨打电话...')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">📞</div>
+            <div class="list-text">科室电话 021-xxxxxxxx</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showToast('跳转至图文问诊...')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">💬</div>
+            <div class="list-text">在线图文问诊</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图文问诊 -->
+  <div class="sub-page" id="page-onlineConsult">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('onlineConsult')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">图文问诊</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">🩺 选择问诊方式</div>
+        <div class="list-item" onclick="showToast('发起快速咨询（24小时内回复）')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(21,183,168,0.1);">⚡</div>
+            <div class="list-text">快速咨询</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showToast('预约视频问诊')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">📹</div>
+            <div class="list-text">视频问诊</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showToast('预约电话问诊')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(100,149,237,0.1);">📞</div>
+            <div class="list-text">电话问诊</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 问诊历史</div>
+        <div style="font-size:14px;color:#888;padding:10px 0;">暂无问诊记录</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 医生协作授权 -->
+  <div class="sub-page" id="page-doctorAuth">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('doctorAuth')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">医生协作授权</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="alert-card alert-green">
+        <div class="alert-title">✅ 已授权主治医生查看数据</div>
+        <div class="alert-desc">王建国主任医师可查看患者的打卡记录、用药情况和风险评估报告。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔓 授权范围</div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">每日打卡数据</div>
+            <div class="switch-desc">睡眠、情绪、服药等记录</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">AI分析报告</div>
+            <div class="switch-desc">风险评估、趋势分析</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">用药记录</div>
+            <div class="switch-desc">服药时间、副作用记录</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">照护笔记</div>
+            <div class="switch-desc">家属手动记录的内容</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <button class="btn-danger" style="background:#fff;color:#ff6b6b;border:1px solid rgba(255,80,80,0.2);" onclick="showModal('revokeAuth')">
+        撤销所有授权
+      </button>
+    </div>
+  </div>
+
+  <!-- 通知设置 -->
+  <div class="sub-page" id="page-settingsNotify">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('settingsNotify')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">通知设置</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">🔔 提醒通知</div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">服药提醒</div>
+            <div class="switch-desc">每日定时提醒服药</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">打卡提醒</div>
+            <div class="switch-desc">每日睡前提醒完成打卡</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">复诊提醒</div>
+            <div class="switch-desc">复诊前3天发送提醒</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">风险预警</div>
+            <div class="switch-desc">指标异常时立即推送</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📢 消息推送</div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">社群消息</div>
+            <div class="switch-desc">家属社群的新回复和@</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">科普文章推送</div>
+            <div class="switch-desc">每周精选文章推荐</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 隐私与数据 -->
+  <div class="sub-page" id="page-settingsPrivacy">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('settingsPrivacy')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">隐私与数据</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">🔏 数据安全</div>
+        <div class="list-item" onclick="showToast('已清除本地缓存')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,165,0,0.1);">🗑️</div>
+            <div class="list-text">清除本地缓存</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+        <div class="list-item" onclick="showModal('deleteData')">
+          <div class="list-item-left">
+            <div class="list-icon" style="background:rgba(255,80,80,0.1);">⚠️</div>
+            <div class="list-text">删除所有数据</div>
+          </div>
+          <span class="list-arrow">></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📄 隐私政策</div>
+        <div style="font-size:14px;color:#666;line-height:1.7;">
+          守护星APP严格遵守《个人信息保护法》和《数据安全法》。您的健康数据采用端到端加密存储，未经您授权，任何第三方（包括平台运营方）均无法访问原始数据。
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📤 数据导出</div>
+        <div style="font-size:14px;color:#666;line-height:1.6;margin-bottom:12px;">
+          您可以随时导出全部个人数据，格式支持PDF和Excel。
+        </div>
+        <button class="btn-primary" onclick="showModal('exportData')">
+          导出我的数据
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主题与字体 -->
+  <div class="sub-page" id="page-settingsTheme">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('settingsTheme')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">主题与字体</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">🎨 主题色</div>
+        <div style="display:flex;gap:16px;justify-content:center;padding:10px 0;">
+          <div style="text-align:center;cursor:pointer;" onclick="showToast('已切换至绿色主题')">
+            <div style="width:48px;height:48px;border-radius:50%;background:#15B7A8;border:3px solid #333;margin:0 auto;"></div>
+            <div style="font-size:12px;color:#666;margin-top:6px;">绿色</div>
+          </div>
+          <div style="text-align:center;cursor:pointer;" onclick="showToast('已切换至米白主题')">
+            <div style="width:48px;height:48px;border-radius:50%;background:#F5F0E8;border:2px solid #ddd;margin:0 auto;"></div>
+            <div style="font-size:12px;color:#666;margin-top:6px;">米白</div>
+          </div>
+          <div style="text-align:center;cursor:pointer;" onclick="showToast('已切换至深色主题')">
+            <div style="width:48px;height:48px;border-radius:50%;background:#2d2d2d;border:2px solid #ddd;margin:0 auto;"></div>
+            <div style="font-size:12px;color:#666;margin-top:6px;">深色</div>
+          </div>
+        </div>
+        <div class="switch-row" style="border-bottom:none;margin-top:8px;">
+          <div>
+            <div class="switch-label">🌙 跟随系统</div>
+            <div class="switch-desc">自动根据系统设置切换深浅色</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔤 字体大小</div>
+        <div class="font-size-slider">
+          <div class="font-size-dot" data-label="小" data-size="13" onclick="setFontSize(0,this)"></div>
+          <div class="font-size-line"><div class="font-size-fill" id="fontFill" style="width:25%;"></div></div>
+          <div class="font-size-dot active" data-label="标准" data-size="15" onclick="setFontSize(1,this)"></div>
+          <div class="font-size-line"><div class="font-size-fill" id="fontFill2" style="width:25%;"></div></div>
+          <div class="font-size-dot" data-label="大" data-size="17" onclick="setFontSize(2,this)"></div>
+          <div class="font-size-line"><div class="font-size-fill" id="fontFill3" style="width:25%;"></div></div>
+          <div class="font-size-dot" data-label="特大" data-size="19" onclick="setFontSize(3,this)"></div>
+          <div class="font-size-line"><div class="font-size-fill" id="fontFill4" style="width:25%;"></div></div>
+          <div class="font-size-dot" data-label="超大" data-size="21" onclick="setFontSize(4,this)"></div>
+        </div>
+        <div class="font-preview">
+          <div class="font-preview-text" id="fontPreviewText">
+            预览文字：精神分裂症是一种严重的精神障碍，早期识别和干预对于改善预后至关重要。
+          </div>
+        </div>
+        <div style="text-align:center;color:#15B7A8;font-size:14px;font-weight:600;margin-top:12px;" id="fontSizeLabel">当前：标准</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 无障碍模式 -->
+  <div class="sub-page" id="page-settingsAccessibility">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('settingsAccessibility')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">无障碍模式</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card">
+        <div class="card-title">♿ 辅助功能</div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">语音播报</div>
+            <div class="switch-desc">点击内容自动朗读</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">高对比度</div>
+            <div class="switch-desc">增强文字与背景对比</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">大字体模式</div>
+            <div class="switch-desc">全局字体放大1.5倍</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">简化界面</div>
+            <div class="switch-desc">隐藏非必要元素，聚焦核心功能</div>
+          </div>
+          <div class="switch-btn" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 操作辅助</div>
+        <div class="switch-row" style="border-bottom:none;">
+          <div>
+            <div class="switch-label">长按确认</div>
+            <div class="switch-desc">重要操作需长按确认，防止误触</div>
+          </div>
+          <div class="switch-btn on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 打卡详情底部弹窗 ===== -->
+  <div class="chat-modal-overlay" id="checkinModalOverlay" onclick="closeCheckinDetail()">
+    <div class="chat-modal" onclick="event.stopPropagation()" style="height:82%;">
+      <div class="chat-modal-header">
+        <div class="chat-modal-title" id="checkinModalTitle">
+          <span>打卡详情</span>
+        </div>
+        <button class="chat-close-btn" onclick="closeCheckinDetail()">✕</button>
+      </div>
+      <div class="chat-modal-body" id="checkinDetailBody">
+        <!-- 动态填充 -->
+      </div>
+      <div class="chat-modal-footer" id="checkinModalFooter" style="text-align:center;">
+        <button class="btn-primary" onclick="saveCheckin()">✓ 保存打卡记录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AI问答大弹窗 ===== -->
+  <div class="chat-modal-overlay" id="chatModalOverlay" onclick="closeChatModal()">
+    <div class="chat-modal" onclick="event.stopPropagation()">
+      <div class="chat-modal-header">
+        <div class="chat-modal-title">
+          <span style="font-size:22px;">🤖</span>
+          <span>AI智能问答</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="chat-close-btn" style="width:auto;padding:6px 12px;font-size:13px;border-radius:16px;" onclick="closeChatModal();openPage('chatHistory')">📜 历史记录</button>
+          <button class="chat-close-btn" onclick="closeChatModal()">✕</button>
+        </div>
+      </div>
+      <div class="chat-modal-body" id="chatBody">
+        <div class="chat-bubble ai">
+          <strong>守护星AI助手</strong><br>
+          您好！我是守护星智能助手。您可以向我描述患者的症状变化、情绪状态或任何疑问，我会根据记录数据为您提供分析和建议。
+        </div>
+        <div class="chat-bubble user">最近患者睡眠不太好，晚上容易醒</div>
+        <div class="chat-bubble ai">
+          了解到患者近期睡眠易中断。根据记录，过去3天平均睡眠时长为6小时，较上周下降约1小时。<br><br>
+          <strong>建议：</strong><br>
+          1. 观察是否出现新的环境变化或心理压力<br>
+          2. 避免傍晚饮用含咖啡因饮品<br>
+          3. 如持续3天以上，建议联系主治医生调整用药方案
+        </div>
+      </div>
+      <div class="chat-modal-footer">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:36px;height:36px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all 0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">🎙️</div>
+          <input class="input-box" id="chatInput" style="flex:1;margin:0;background:#f5f5f5;" placeholder="输入症状或提问..." onkeydown="if(event.key==='Enter')sendChat()">
+          <div style="width:36px;height:36px;background:#15B7A8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:18px;transition:all 0.2s;" onclick="sendChat()" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">➤</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI问答历史记录 -->
+  <div class="sub-page" id="page-chatHistory">
+    <div class="sub-page-header">
+      <button class="back-btn" onclick="closePage('chatHistory')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        返回
+      </button>
+      <span style="flex:1;text-align:center;margin-right:52px;">历史记录</span>
+    </div>
+    <div class="sub-page-body">
+      <div class="card" onclick="closePage('chatHistory');openChatModal();" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:rgba(21,183,168,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">🤖</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;color:#333;">最近患者睡眠不太好，晚上容易醒</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">AI建议：观察环境变化、避免咖啡因、持续3天以上联系医生</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.03);">
+          <span style="font-size:12px;color:#aaa;">2026-05-02 21:15</span>
+          <span style="font-size:12px;color:#15B7A8;font-weight:600;">查看对话 ></span>
+        </div>
+      </div>
+      <div class="card" onclick="closePage('chatHistory');openChatModal();" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:rgba(21,183,168,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">🤖</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;color:#333;">奥氮平的常见副作用有哪些</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">AI回答：体重增加、嗜睡、口干、便秘、血糖升高等</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.03);">
+          <span style="font-size:12px;color:#aaa;">2026-04-28 14:32</span>
+          <span style="font-size:12px;color:#15B7A8;font-weight:600;">查看对话 ></span>
+        </div>
+      </div>
+      <div class="card" onclick="closePage('chatHistory');openChatModal();" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:rgba(21,183,168,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">🤖</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;color:#333;">患者最近不愿意出门怎么办</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;">AI建议：从低强度活动开始、尊重患者节奏、鼓励简单家务</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.03);">
+          <span style="font-size:12px;color:#aaa;">2026-04-25 09:08</span>
+          <span style="font-size:12px;color:#15B7A8;font-weight:600;">查看对话 ></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用提示 -->
+  <div id="toast" style="position:absolute;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all 0.3s;z-index:3000;white-space:nowrap;pointer-events:none;"></div>
+
+  <!-- 弹窗层 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title" id="modalTitle">提示</div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 时钟
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Loading
+setTimeout(() => {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}, 2800);
+
+// 初始化打卡计数
+updateCheckinCount();
+
+// Tab标题映射
+const tabTitles = {
+  today: '今天',
+  record: '记录',
+  learn: '学一学',
+  profile: '我的'
+};
+
+// Tab切换
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab-item[data-tab="' + tab + '"]').classList.add('active');
+
+  // 更新顶部标题
+  document.getElementById('headerTitle').textContent = tabTitles[tab] || '守护星';
+
+  // 控制SOS按钮显示
+  const sos = document.getElementById('sosBtn');
+  if (tab === 'today') sos.style.display = 'flex';
+  else sos.style.display = 'none';
+
+  // 滚动回顶部
+  document.getElementById('appBody').scrollTop = 0;
+}
+
+// 子页面打开/关闭
+function openPage(pageId) {
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('open');
+}
+function closePage(pageId) {
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.remove('open');
+}
+
+// AI问答弹窗
+function openChatModal() {
+  document.getElementById('chatModalOverlay').classList.add('show');
+}
+function closeChatModal() {
+  document.getElementById('chatModalOverlay').classList.remove('show');
+}
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const body = document.getElementById('chatBody');
+
+  // 用户消息
+  const userBubble = document.createElement('div');
+  userBubble.className = 'chat-bubble user';
+  userBubble.textContent = text;
+  body.appendChild(userBubble);
+
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+
+  // 模拟AI回复
+  setTimeout(() => {
+    const aiBubble = document.createElement('div');
+    aiBubble.className = 'chat-bubble ai';
+    aiBubble.innerHTML = '<strong>守护星AI助手</strong><br>已收到您的描述，我正在分析相关数据。建议您继续关注该症状的变化，并在下次复诊时向医生反馈。如有加重趋势，请及时就医。';
+    body.appendChild(aiBubble);
+    body.scrollTop = body.scrollHeight;
+  }, 800);
+}
+
+// 任务勾选
+function toggleTask(el) {
+  const check = el.querySelector('.task-check');
+  const text = el.querySelector('.task-text');
+  check.classList.toggle('done');
+  text.classList.toggle('done');
+}
+
+// 打卡切换（保留基础切换）
+function toggleCheckin(el) {
+  el.classList.toggle('done');
+}
+
+// ===== 打卡详情页 =====
+const checkinConfig = {
+  sleep: {
+    icon: '😴', title: '睡眠',
+    fields: [
+      { type:'time', label:'入睡 / 起床时间', keys:['sleepTime','wakeTime'], values:['23:00','06:30'] },
+      { type:'duration', label:'睡眠时长', id:'sleepDuration', defaultValue:'7h 30min' },
+      { type:'options', label:'睡眠质量', key:'quality', options:['很好','一般','较差','很差'] },
+      { type:'sleepStages', label:'睡眠分期（同步运动手环）', key:'stages' },
+      { type:'textarea', label:'备注', placeholder:'记录睡眠异常情况，如多梦、早醒、噩梦等...' }
+    ]
+  },
+  mood: {
+    icon: '😊', title: '情绪',
+    fields: [
+      { type:'mood', label:'今日情绪', key:'mood' },
+      { type:'options', label:'情绪波动', key:'volatility', options:['无波动','轻微波动','明显波动','剧烈波动'] },
+      { type:'textarea', label:'备注', placeholder:'描述情绪变化的具体表现和可能的诱因...' }
+    ]
+  },
+  social: {
+    icon: '👥', title: '社交',
+    fields: [
+      { type:'options', label:'今日是否有社交活动', key:'hasSocial', options:['有社交','无社交'] },
+      { type:'options', label:'社交对象', key:'socialTarget', options:['家人','朋友','同事','邻居','陌生人'] },
+      { type:'options', label:'社交质量', key:'socialQuality', options:['愉快','一般','不愉快','紧张'] },
+      { type:'textarea', label:'备注', placeholder:'记录社交中的具体情况...' }
+    ]
+  },
+  med: {
+    icon: '💊', title: '服药',
+    fields: [
+      { type:'checklist', label:'今日用药确认', key:'meds', items:[
+        { name:'奥氮平 5mg · 早饭后', checked:true },
+        { name:'盐酸舍曲林 50mg · 晚饭后', checked:false }
+      ]},
+      { type:'options', label:'服药反应', key:'reaction', options:['无不适','轻微口干','嗜睡','食欲增加','其他'] },
+      { type:'textarea', label:'备注', placeholder:'记录副作用或服药异常情况...' }
+    ]
+  },
+  physical: {
+    icon: '💪', title: '身体',
+    fields: [
+      { type:'weight', label:'体重记录', key:'weight', current:'70.0', unit:'kg' },
+      { type:'options', label:'体重变化', key:'weightChange', options:['保持','增加','下降'] },
+      { type:'options', label:'身体状况', key:'condition', options:['精力充沛','正常','疲劳','不适'] },
+      { type:'options', label:'食欲', key:'appetite', options:['很好','正常','较差','很差'] },
+      { type:'textarea', label:'备注', placeholder:'记录身体状况变化...' }
+    ]
+  },
+  observe: {
+    icon: '👁️', title: '观察',
+    fields: [
+      { type:'options', label:'是否出现幻觉', key:'hallucination', options:['无','疑似','明显'] },
+      { type:'options', label:'是否出现妄想', key:'delusion', options:['无','疑似','明显'] },
+      { type:'options', label:'言语逻辑', key:'speech', options:['正常','轻微混乱','明显混乱'] },
+      { type:'options', label:'行为异常', key:'behavior', options:['无异常','轻微异常','明显异常'] },
+      { type:'textarea', label:'备注', placeholder:'详细记录观察到的症状表现...' }
+    ]
+  },
+  selfeval: {
+    icon: '❤️', title: '自评',
+    fields: [
+      { type:'mood', label:'整体自我感受', key:'overall' },
+      { type:'slider', label:'压力水平', sub:'（0无压力 ~ 10极大压力）', min:0, max:10, value:3, step:1, labels:['0','2','4','6','8','10'] },
+      { type:'options', label:'今日整体状态', key:'status', options:['很好','不错','一般','较差','很差'] },
+      { type:'textarea', label:'备注', placeholder:'记录今天的感受和想法...' }
+    ]
+  }
+};
+
+let currentCheckinType = null;
+let currentCheckinEl = null;
+
+function openCheckinDetail(type, el) {
+  currentCheckinType = type;
+  currentCheckinEl = el;
+  const config = checkinConfig[type];
+  if (!config) return;
+
+  const isDone = el.classList.contains('done');
+  document.getElementById('checkinModalTitle').innerHTML = '<span style="font-size:22px;">' + config.icon + '</span> <span>' + config.title + '</span>';
+
+  const body = document.getElementById('checkinDetailBody');
+  let html = '';
+
+  config.fields.forEach(function(f) {
+    html += '<div class="card"><div class="form-group">';
+    html += '<span class="form-label">' + f.label;
+    if (f.sub) html += '<span class="form-label-sub">' + f.sub + '</span>';
+    html += '</span>';
+
+    if (f.type === 'slider') {
+      html += '<div class="slider-group">';
+      html += '<input type="range" min="' + f.min + '" max="' + f.max + '" step="' + (f.step||1) + '" value="' + (f.value||0) + '" style="width:100%;">';
+      html += '<div class="slider-labels">';
+      (f.labels||[]).forEach(function(l) { html += '<span>' + l + '</span>'; });
+      html += '</div></div>';
+    }
+    else if (f.type === 'options') {
+      html += '<div class="option-group">';
+      f.options.forEach(function(opt, i) {
+        html += '<div class="option-btn' + (i===0?' selected':'') + '" onclick="selectOption(this)">' + opt + '</div>';
+      });
+      html += '</div>';
+    }
+    else if (f.type === 'mood') {
+      var moods = [
+        { emoji:'😄', label:'很好' },
+        { emoji:'🙂', label:'不错' },
+        { emoji:'😐', label:'一般' },
+        { emoji:'😔', label:'不太好' },
+        { emoji:'😢', label:'很差' }
+      ];
+      html += '<div class="mood-emoji-row">';
+      moods.forEach(function(m, i) {
+        html += '<div style="text-align:center;cursor:pointer;" onclick="selectMood(this)">';
+        html += '<div class="mood-emoji' + (i===1?' selected':'') + '">' + m.emoji + '</div>';
+        html += '<div class="mood-emoji-label">' + m.label + '</div></div>';
+      });
+      html += '</div>';
+    }
+    else if (f.type === 'time') {
+      html += '<div class="time-input-row">';
+      html += '<input class="time-input sleep-time-in" type="time" value="' + (f.values?f.values[0]:'') + '" placeholder="开始时间" onchange="calcSleepDuration()">';
+      html += '<span style="color:#888;">至</span>';
+      html += '<input class="time-input sleep-time-out" type="time" value="' + (f.values?f.values[1]:'') + '" placeholder="结束时间" onchange="calcSleepDuration()">';
+      html += '</div>';
+    }
+    else if (f.type === 'duration') {
+      html += '<div style="text-align:center;padding:10px 0;font-size:28px;font-weight:800;color:#15B7A8;" id="' + (f.id||'') + '">' + (f.defaultValue||'') + '</div>';
+    }
+    else if (f.type === 'sleepStages') {
+      // 圆环数据: 深睡135min(30%), 浅睡230min(51.1%), 快速眼动85min(18.9%), 总计450min
+      var stages = [
+        { label:'深睡', time:'2h 15min', min:135, color:'#3b7ddd' },
+        { label:'浅睡', time:'3h 50min', min:230, color:'#15B7A8' },
+        { label:'快速眼动', time:'1h 25min', min:85, color:'#9b59b6' }
+      ];
+      var totalMin = stages.reduce(function(s,i){return s+i.min;},0);
+      var cx=70, cy=70, r=54, circ=2*Math.PI*r;
+      var offset=0;
+      var segments='';
+      stages.forEach(function(s,i){
+        var len = (s.min/totalMin)*circ;
+        segments += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+s.color+'" stroke-width="22" stroke-linecap="butt" stroke-dasharray="'+len.toFixed(1)+' '+(circ-len).toFixed(1)+'" stroke-dashoffset="'+(circ*0.25-offset).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')" style="transition: all 0.6s ease;"/>';
+        offset += len;
+      });
+      html += '<div style="display:flex;align-items:center;gap:16px;">';
+      html += '<div style="position:relative;width:140px;height:140px;flex-shrink:0;">';
+      html += '<svg viewBox="0 0 140 140" style="width:100%;height:100%;">';
+      html += segments;
+      html += '</svg>';
+      html += '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">';
+      html += '<div style="font-size:22px;font-weight:800;color:#333;">7.5h</div>';
+      html += '<div style="font-size:11px;color:#888;">总时长</div>';
+      html += '</div></div>';
+      html += '<div style="flex:1;">';
+      stages.forEach(function(s){
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.03);">';
+        html += '<div style="display:flex;align-items:center;gap:6px;">';
+        html += '<div style="width:10px;height:10px;border-radius:50%;background:'+s.color+';"></div>';
+        html += '<span style="font-size:13px;color:#555;">'+s.label+'</span></div>';
+        html += '<div style="text-align:right;">';
+        html += '<div style="font-size:14px;font-weight:700;color:#333;">'+s.time+'</div>';
+        html += '<div style="font-size:11px;color:#aaa;">'+(s.min/totalMin*100).toFixed(0)+'%</div>';
+        html += '</div></div>';
+      });
+      html += '</div></div>';
+      html += '<div style="text-align:center;margin-top:6px;font-size:11px;color:#aaa;">⌚ 数据同步自运动手环</div>';
+    }
+    else if (f.type === 'weight') {
+      html += '<div style="display:flex;align-items:center;gap:12px;">';
+      html += '<div style="flex:1;text-align:center;background:#f5f7fa;border-radius:12px;padding:12px;">';
+      html += '<div style="font-size:12px;color:#888;margin-bottom:2px;">当前体重</div>';
+      html += '<div style="font-size:24px;font-weight:800;color:#333;">' + (f.current||'--') + '</div>';
+      html += '<div style="font-size:12px;color:#aaa;">' + (f.unit||'kg') + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:20px;color:#888;">→</div>';
+      html += '<div style="flex:1;text-align:center;background:#f5f7fa;border-radius:12px;padding:12px;">';
+      html += '<div style="font-size:12px;color:#888;margin-bottom:2px;">今日体重</div>';
+      html += '<input class="time-input" type="number" step="0.1" placeholder="' + (f.current||'') + '" style="width:100%;font-size:24px;font-weight:800;border:none;background:transparent;text-align:center;padding:4px 0;">';
+      html += '<div style="font-size:12px;color:#aaa;">' + (f.unit||'kg') + '</div>';
+      html += '</div>';
+      html += '</div>';
+    }
+    else if (f.type === 'checklist') {
+      f.items.forEach(function(item) {
+        html += '<div class="check-item">';
+        html += '<div class="check-box' + (item.checked?' checked':'') + '" onclick="toggleCheckBox(this)"></div>';
+        html += '<span class="check-text">' + item.name + '</span>';
+        html += '</div>';
+      });
+    }
+    else if (f.type === 'textarea') {
+      html += '<textarea class="textarea-box" placeholder="' + (f.placeholder||'') + '"></textarea>';
+    }
+    html += '</div></div>';
+  });
+
+  body.innerHTML = html;
+  // 自动计算初始睡眠时长
+  if (type === 'sleep') { setTimeout(function() { calcSleepDuration(); }, 50); }
+  document.getElementById('checkinModalOverlay').classList.add('show');
+}
+
+function closeCheckinDetail() {
+  document.getElementById('checkinModalOverlay').classList.remove('show');
+}
+
+function selectOption(el) {
+  var group = el.parentElement;
+  group.querySelectorAll('.option-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+
+function selectMood(el) {
+  var row = el.parentElement.parentElement;
+  row.querySelectorAll('.mood-emoji').forEach(function(e) { e.classList.remove('selected'); });
+  el.querySelector('.mood-emoji').classList.add('selected');
+}
+
+function toggleCheckBox(el) {
+  el.classList.toggle('checked');
+}
+
+function calcSleepDuration() {
+  var inputs = document.querySelectorAll('.sleep-time-in, .sleep-time-out');
+  if (inputs.length < 2) return;
+  var t1 = inputs[0].value, t2 = inputs[1].value;
+  if (!t1 || !t2) return;
+  var a = t1.split(':'), b = t2.split(':');
+  var startMin = parseInt(a[0])*60 + parseInt(a[1]);
+  var endMin = parseInt(b[0])*60 + parseInt(b[1]);
+  if (endMin <= startMin) endMin += 24*60; // 跨天
+  var diff = endMin - startMin;
+  var h = Math.floor(diff/60), m = diff%60;
+  var el = document.getElementById('sleepDuration');
+  if (el) el.textContent = h + 'h ' + m + 'min';
+}
+
+function updateCheckinCount() {
+  var total = document.querySelectorAll('.checkin-item').length;
+  var done = document.querySelectorAll('.checkin-item.done').length;
+  var el = document.getElementById('checkinCount');
+  if (el) {
+    el.textContent = done + '/' + total + ' 已完成';
+    el.className = done === total ? 'tag tag-green' : 'tag tag-orange';
+  }
+}
+
+function saveCheckin() {
+  if (currentCheckinEl) {
+    currentCheckinEl.classList.add('done');
+  }
+  updateCheckinCount();
+  showToast('打卡记录已保存 ✓');
+  setTimeout(function() { closeCheckinDetail(); }, 800);
+}
+
+// 用药勾选
+function toggleMed(el) {
+  el.classList.toggle('taken');
+}
+
+// Toast提示
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(-20px)';
+  }, 2000);
+}
+
+// 弹窗系统
+const modals = {
+  sos: {
+    title: '🆘 紧急求助',
+    body: `<button class="modal-btn modal-btn-danger" onclick="showToast('正在呼叫医院急诊...');closeModal();">🏥 呼叫医院急诊</button>
+           <button class="modal-btn modal-btn-primary" onclick="showToast('正在联系主治医生...');closeModal();">👨‍⚕️ 联系主治医生</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  },
+  logout: {
+    title: '确认退出',
+    body: `<p style="text-align:center;color:#666;margin-bottom:16px;font-size:14px;">确定要退出当前账号吗？</p>
+           <button class="modal-btn modal-btn-danger" onclick="showToast('已退出登录');closeModal();">确认退出</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  },
+  exportData: {
+    title: '📤 导出数据',
+    body: `<button class="modal-btn modal-btn-primary" onclick="showToast('数据已生成，开始下载...');closeModal();">下载近7天数据</button>
+           <button class="modal-btn modal-btn-primary" onclick="showToast('数据已生成，开始下载...');closeModal();">下载近30天数据</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  },
+  emergencyConfirm: {
+    title: '🚨 确认急诊',
+    body: `<p style="text-align:center;color:#666;margin-bottom:16px;font-size:14px;">系统将为您呼叫最近的急救中心，是否继续？</p>
+           <button class="modal-btn modal-btn-danger" onclick="showToast('正在连接急救中心 120...');closeModal();">确认呼叫</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  },
+  revokeAuth: {
+    title: '⚠️ 撤销授权',
+    body: `<p style="text-align:center;color:#666;margin-bottom:16px;font-size:14px;">撤销后医生将无法查看患者数据，是否继续？</p>
+           <button class="modal-btn modal-btn-danger" onclick="showToast('已撤销医生数据访问权限');closeModal();">确认撤销</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  },
+  deleteData: {
+    title: '⚠️ 删除所有数据',
+    body: `<p style="text-align:center;color:#666;margin-bottom:16px;font-size:14px;">此操作将永久删除所有记录，不可恢复！</p>
+           <button class="modal-btn modal-btn-danger" onclick="showToast('数据已删除');closeModal();">确认删除</button>
+           <button class="modal-btn modal-btn-default" onclick="closeModal();">取消</button>`
+  }
+};
+
+function showModal(type) {
+  const data = modals[type];
+  if (!data) return;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// 分类标签切换
+function switchCategory(el, cat) {
+  document.querySelectorAll('.category-scroll .tag').forEach(t => {
+    t.classList.remove('tag-green');
+    t.style.background = '#f0f0f0';
+    t.style.color = '#666';
+  });
+  el.classList.add('tag-green');
+  el.style.background = '';
+  el.style.color = '';
+
+  const list = document.getElementById('articleCards');
+  const articles = {
+    all: [
+      {icon:'📖',title:'精神分裂症的早期识别信号',desc:'了解疾病复发的早期征兆...',tag:'疾病科普',tagClass:'tag-green'},
+      {icon:'💡',title:'如何与患者有效沟通',desc:'掌握正确的沟通技巧...',tag:'护理指南',tagClass:'tag-orange'},
+      {icon:'🛡️',title:'药物依从性管理指南',desc:'帮助患者坚持服药...',tag:'复发预防',tagClass:'tag-red'}
+    ],
+    科普: [
+      {icon:'📖',title:'精神分裂症的早期识别信号',desc:'了解疾病复发的早期征兆...',tag:'疾病科普',tagClass:'tag-green'},
+      {icon:'🧠',title:'精神分裂症的发病机制',desc:'从神经生物学角度理解疾病...',tag:'疾病科普',tagClass:'tag-green'},
+      {icon:'📊',title:'精神分裂症的发病率与预后',desc:'全球数据与长期随访研究...',tag:'疾病科普',tagClass:'tag-green'}
+    ],
+    护理: [
+      {icon:'💡',title:'如何与患者有效沟通',desc:'掌握正确的沟通技巧...',tag:'护理指南',tagClass:'tag-orange'},
+      {icon:'🍽️',title:'患者的饮食护理要点',desc:'营养均衡与药物相互作用...',tag:'护理指南',tagClass:'tag-orange'},
+      {icon:'🏃',title:'帮助患者建立运动习惯',desc:'适量运动对康复的积极作用...',tag:'护理指南',tagClass:'tag-orange'}
+    ],
+    预防: [
+      {icon:'🛡️',title:'药物依从性管理指南',desc:'帮助患者坚持服药...',tag:'复发预防',tagClass:'tag-red'},
+      {icon:'⚠️',title:'识别复发前兆的10个信号',desc:'家属必知的预警信号清单...',tag:'复发预防',tagClass:'tag-red'},
+      {icon:'🔄',title:'复发后的紧急处理流程',desc:'第一时间应该做什么...',tag:'复发预防',tagClass:'tag-red'}
+    ],
+    康复: [
+      {icon:'🌱',title:'职业康复与社会融入',desc:'帮助患者重返工作岗位...',tag:'康复支持',tagClass:''},
+      {icon:'🎨',title:'艺术治疗在康复中的应用',desc:'绘画、音乐等辅助疗法...',tag:'康复支持',tagClass:''},
+      {icon:'🤝',title:'建立患者的社会支持网络',desc:'社区资源与互助小组...',tag:'康复支持',tagClass:''}
+    ]
+  };
+
+  const data = articles[cat] || articles.all;
+  list.innerHTML = data.map(a => `
+    <div class="card" onclick="openPage('articleDetail')" style="cursor:pointer;">
+      <div style="display:flex;gap:12px;">
+        <div style="width:80px;height:80px;background:rgba(21,183,168,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;">${a.icon}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">${a.title}</div>
+          <div style="font-size:12px;color:#888;line-height:1.5;">${a.desc}</div>
+          <div style="margin-top:8px;">
+            <span class="tag ${a.tagClass}" style="font-size:11px;">${a.tag}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 分类标签拖拽滑动
+(function() {
+  const slider = document.getElementById('categoryScroll');
+  if (!slider) return;
+  let isDown = false, startX, scrollLeft;
+  slider.addEventListener('mousedown', e => {
+    isDown = true;
+    slider.style.cursor = 'grabbing';
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+  slider.addEventListener('mouseleave', () => { isDown = false; slider.style.cursor = 'grab'; });
+  slider.addEventListener('mouseup', () => { isDown = false; slider.style.cursor = 'grab'; });
+  slider.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
+  // 触摸支持
+  slider.addEventListener('touchstart', e => {
+    startX = e.touches[0].pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  }, {passive:true});
+  slider.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  }, {passive:true});
+})();
+
+// 收藏切换
+function toggleFav(el) {
+  if (el.textContent === '🤍') {
+    el.textContent = '❤️';
+    showToast('已收藏');
+  } else {
+    el.textContent = '🤍';
+    showToast('取消收藏');
+  }
+}
+
+// 字体大小设置
+function setFontSize(idx, el) {
+  document.querySelectorAll('.font-size-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  const sizes = ['小','标准','大','特大','超大'];
+  const pxSizes = [13,15,17,19,21];
+  document.getElementById('fontSizeLabel').textContent = '当前：' + sizes[idx];
+  document.getElementById('fontPreviewText').style.fontSize = pxSizes[idx] + 'px';
+
+  // 更新进度条
+  const fills = ['fontFill','fontFill2','fontFill3','fontFill4'];
+  fills.forEach((id, i) => {
+    const fill = document.getElementById(id);
+    if (fill) fill.style.width = i < idx ? '100%' : (i === idx ? '50%' : '0%');
+  });
+}
+</script>
+
+</body>
+</html>

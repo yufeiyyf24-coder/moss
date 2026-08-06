@@ -1,0 +1,148 @@
+@import "tailwindcss";
+@import "@chinese-fonts/lxgwwenkai/dist/LXGWWenKai-Regular/result.css";
+@import "@fontsource/zcool-kuaile/chinese-simplified.css";
+
+@theme inline {
+  --color-moss-background: #f7faf4;
+  --color-moss-warm: #f2f0ea;
+  --color-moss-light: #eef7ea;
+  --color-moss-soft: #ddefd8;
+  --color-moss-green: #b7d8a8;
+  --color-moss-leaf: #90b97b;
+  --color-moss-deep: #6f9e5d;
+  --color-moss-ink: #3a4a38;
+
+  --color-domain-sustainability: #d5dac4;
+  --color-domain-visual: #fcf9e9;
+  --color-domain-mind: #ddf0ea;
+  --color-domain-living: #d4ddbe;
+  --color-domain-ai: #ebecf6;
+  --color-domain-connections: #d6cfe0;
+
+  /* 守护星 demo 配色（与 public/shouhuxing-demo.html 统一） */
+  --color-shx-mint: #e5f4f1;
+  --color-shx-teal: #15b7a8;
+  --color-shx-card: #f8fafb;
+  --color-shx-night: #1a1f2e;
+
+  --font-sans: "DM Sans", "LXGW WenKai", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+  --font-wenkai: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", serif;
+}
+
+:root {
+  --background: #f7faf4;
+  --foreground: #3a4a38;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.1) translate(2%, -2%);
+    opacity: 0.65;
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(12px, -18px);
+  }
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.2);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+.animate-breathe {
+  animation: breathe 14s ease-in-out infinite;
+}
+
+.animate-breathe-slow {
+  animation: breathe 20s ease-in-out infinite reverse;
+}
+
+.animate-drift {
+  animation: drift 24s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 16s ease-in-out infinite;
+}
+
+@keyframes float-breathe {
+  0%,
+  100% {
+    translate: 0px 0px;
+  }
+  50% {
+    translate: var(--float-x, 4px) var(--float-y, -8px);
+  }
+}
+
+.animate-float {
+  animation: float-breathe var(--float-duration, 8s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  will-change: transform, opacity;
+}
+
+.font-wenkai {
+  font-family: var(--font-wenkai);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathe,
+  .animate-breathe-slow,
+  .animate-drift,
+  .animate-shimmer,
+  .animate-float,
+  .animate-twinkle {
+    animation: none;
+  }
+}
+
+/* Freeze all ambient animations during page transition */
+body[data-transitioning] .animate-float,
+body[data-transitioning] .animate-breathe,
+body[data-transitioning] .animate-breathe-slow,
+body[data-transitioning] .animate-drift,
+body[data-transitioning] .animate-shimmer,
+body[data-transitioning] .animate-twinkle {
+  animation-play-state: paused !important;
+}
