@@ -22,10 +22,11 @@ export function WindLayer() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Reduced motion: keep the particle field, but paint it once as a frozen
+    // frame instead of running the drift loop (static branch further down).
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (prefersReducedMotion) return;
 
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -80,23 +81,24 @@ export function WindLayer() {
 
     const mouse = { x: -1000, y: -1000 };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    };
-
-    const handleResize = () => {
-      setSize();
-    };
-
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    window.addEventListener("resize", handleResize, { passive: true });
-
     let time = 0;
-    let rafId: number;
 
-    const draw = () => {
+    const paint = () => {
       ctx.clearRect(0, 0, width, height);
+
+      for (const p of particles) {
+        // opacity changes with distance to center as particles drift
+        const opacity =
+          opacityByDistance(p.x, p.y) * (0.85 + Math.sin(time + p.phase) * 0.15);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(111, 158, 93, ${opacity})`;
+        ctx.fill();
+      }
+    };
+
+    const step = () => {
       time += 0.004;
 
       for (const p of particles) {
@@ -131,16 +133,39 @@ export function WindLayer() {
         if (p.x > width + 10) p.x = -10;
         if (p.y < -10) p.y = height + 10;
         if (p.y > height + 10) p.y = -10;
-
-        // opacity changes with distance to center as particles drift
-        const opacity = opacityByDistance(p.x, p.y) * (0.85 + Math.sin(time + p.phase) * 0.15);
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(111, 158, 93, ${opacity})`;
-        ctx.fill();
       }
+    };
 
+    /* Reduced motion: same field, painted once and left still — no loop. */
+    if (prefersReducedMotion) {
+      paint();
+
+      const onResize = () => {
+        setSize();
+        paint();
+      };
+      window.addEventListener("resize", onResize, { passive: true });
+
+      return () => window.removeEventListener("resize", onResize);
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+
+    const handleResize = () => {
+      setSize();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    let rafId: number;
+
+    const draw = () => {
+      step();
+      paint();
       rafId = requestAnimationFrame(draw);
     };
 

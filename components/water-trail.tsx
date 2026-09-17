@@ -57,10 +57,12 @@ export function WaterTrail({ color = "#b7d8a8" }: { color?: string }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Reduced motion: no trailing afterimage — a single still glow sits under
+    // the pointer and is repainted only when the pointer actually moves
+    // (static branch below). Nothing animates on its own.
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (prefersReducedMotion) return;
 
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -77,6 +79,33 @@ export function WaterTrail({ color = "#b7d8a8" }: { color?: string }) {
     };
 
     setSize();
+
+    /* Reduced motion: keep a still water glow under the cursor, drop the
+       fading tail entirely. No rAF loop — the canvas only repaints in
+       response to the pointer. */
+    if (prefersReducedMotion) {
+      const render = (x: number, y: number) => {
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${hueToRgbTriplet(hexToHue(colorRef.current))}, 0.12)`;
+        ctx.fill();
+      };
+
+      const onMove = (e: MouseEvent) => render(e.clientX, e.clientY);
+      const onResize = () => setSize();
+      const onLeave = () => ctx.clearRect(0, 0, width, height);
+
+      window.addEventListener("mousemove", onMove, { passive: true });
+      window.addEventListener("resize", onResize, { passive: true });
+      document.addEventListener("mouseleave", onLeave);
+
+      return () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("mouseleave", onLeave);
+      };
+    }
 
     const trail: TrailPoint[] = [];
     const maxAge = 90;
