@@ -11,7 +11,8 @@ import {
   TaskCurveChart,
   WordCloud,
 } from "@/components/shouhuxing-data-viz";
-import { SpreadLayout, hashString } from "@/components/spread-layout";
+import { SpreadLayout } from "@/components/spread-layout";
+import { CaregiverCarousel } from "@/components/caregiver-carousel";
 
 const quotes = [
   {
@@ -175,165 +176,6 @@ const demoSteps = [
   },
 ];
 
-function PersonaQuotes() {
-  const [active, setActive] = useState<string | null>(null);
-
-  const activeQuote = active ? quotes.find((q) => q.id === active) : null;
-
-  return (
-    <motion.div layout className="mt-12">
-      {/* Active state: quote title → persona card → other quotes */}
-      <AnimatePresence mode="popLayout">
-        {active && activeQuote && (
-          <motion.div
-            key={`detail-${active}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            {/* Active quote as title — pinned to top-left */}
-            <motion.div
-              layoutId={`quote-${active}`}
-              className="mb-6"
-            >
-              <span className="mb-2 block select-none font-wenkai text-xl leading-none text-shx-teal/40 sm:text-2xl">
-                "
-              </span>
-              <p className="font-wenkai text-lg leading-relaxed text-moss-ink/80 sm:text-xl">
-                {activeQuote.short}
-              </p>
-            </motion.div>
-
-            {/* Persona card */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.5, ease: [0.2, 0, 0.2, 1] }}
-              className="mb-10 rounded-2xl border border-shx-teal/20 bg-white/50 p-6 shadow-sm backdrop-blur-sm sm:p-8"
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <span className="text-xs font-light tracking-[0.15em] text-moss-ink/30">
-                  照护者画像
-                </span>
-                <button
-                  onClick={() => setActive(null)}
-                  className="text-xs tracking-wide text-moss-ink/30 underline-offset-4 transition-colors hover:text-moss-ink/60"
-                >
-                  收起 ✕
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-6 sm:flex-row sm:gap-10">
-                <div className="shrink-0 sm:min-w-[120px]">
-                  <p className="font-wenkai text-2xl font-light text-moss-ink/85 sm:text-3xl">
-                    {activeQuote.name}
-                  </p>
-                  {activeQuote.age && (
-                    <p className="mt-1 text-4xl font-thin tracking-tight text-shx-teal/40 sm:text-5xl">
-                      {activeQuote.age}
-                    </p>
-                  )}
-                  {activeQuote.duration && (
-                    <p className="mt-2 text-xs tracking-wide text-moss-ink/35">
-                      {activeQuote.duration}
-                    </p>
-                  )}
-                </div>
-
-                <div className="min-w-0 flex-1 space-y-4">
-                  <p className="text-sm leading-7 text-moss-ink/70 sm:text-base sm:leading-8">
-                    {activeQuote.role}
-                  </p>
-                  <p className="text-sm leading-7 text-moss-ink/65 sm:text-base sm:leading-8">
-                    {activeQuote.situation}
-                  </p>
-                  {activeQuote.daily && (
-                    <div className="rounded-lg bg-shx-card/60 px-4 py-3 text-xs leading-6 text-moss-ink/50 sm:text-sm">
-                      <span className="mr-2 text-moss-ink/30">日常循环</span>
-                      {activeQuote.daily}
-                    </div>
-                  )}
-                  <p className="font-wenkai text-sm italic leading-7 text-moss-ink/75 sm:text-base sm:leading-8">
-                    「{activeQuote.deep}」
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Quote bubbles — alternating left/right like drifting thoughts */}
-      <div className="flex flex-col gap-8 sm:gap-12">
-        {(active
-          ? quotes.filter((q) => q.id !== active)
-          : quotes
-        ).map((q, i) => {
-          const isDimmed = !!active;
-          const isLeft = i % 2 === 0;
-          const shift = 6 + (hashString(q.id) % 14); // 6%~19% 确定性散落
-
-          return (
-            <div
-              key={q.id}
-              className={`flex ${isLeft ? "justify-start" : "justify-end"}`}
-            >
-            <motion.button
-              layout
-              onClick={() => setActive(q.id)}
-              animate={{
-                opacity: isDimmed ? 0.18 : 1,
-                x: isDimmed ? (isLeft ? -12 : 12) : 0,
-              }}
-              transition={{
-                layout: { duration: 0.5, ease: [0.2, 0, 0.2, 1] },
-                opacity: { duration: 0.6 },
-                x: { duration: 0.6, ease: [0.2, 0, 0.2, 1] },
-              }}
-              style={
-                isLeft
-                  ? { marginLeft: `${shift}%` }
-                  : { marginRight: `${shift}%` }
-              }
-              className="group relative max-w-[85%] text-left sm:max-w-[70%]"
-            >
-              <div
-                className={`relative rounded-2xl px-6 py-5 transition-all duration-700 sm:px-7 ${
-                  isLeft
-                    ? "rounded-bl-md bg-shx-card/80"
-                    : "rounded-br-md bg-white/60"
-                } shadow-sm hover:shadow-md hover:bg-white/80`}
-              >
-                {/* 对话框小尖角：贴在气泡底角，颜色跟随气泡本体（含 hover） */}
-                <span
-                  className={`absolute -bottom-1.5 h-3 w-3 rotate-45 transition-colors duration-700 ${
-                    isLeft
-                      ? "left-4 bg-shx-card/80 group-hover:bg-white/80"
-                      : "right-4 bg-white/60 group-hover:bg-white/80"
-                  }`}
-                />
-                {/* 装饰性引号：左上开引号 + 右下闭引号，大号淡色图形 */}
-                <span className="pointer-events-none absolute -top-3 left-2 select-none font-wenkai text-3xl leading-none text-shx-teal/20 transition-colors duration-500 group-hover:text-shx-teal/40 sm:text-4xl">
-                  “
-                </span>
-                <span className="pointer-events-none absolute bottom-2 right-3 select-none font-wenkai text-3xl leading-none text-shx-teal/20 transition-colors duration-500 group-hover:text-shx-teal/40 sm:text-4xl">
-                  ”
-                </span>
-                <p className="font-wenkai text-base leading-relaxed text-moss-ink/70 transition-colors duration-500 group-hover:text-moss-ink/90 sm:text-lg">
-                  {q.short}
-                </p>
-              </div>
-            </motion.button>
-            </div>
-          );
-        })}
-      </div>
-    </motion.div>
-  );
-}
-
 type DemoAction = { tab?: string; page?: string; modal?: boolean };
 
 /* demo 文件在全局暴露的交互函数 */
@@ -489,12 +331,13 @@ export function ShouhuxingBody() {
         title="第一章 · 土壤"
         subtitle="为什么做？在精神疾病面前，有一个群体被系统性地忽视了。"
         layout="wide"
+        className="lg:pb-8 lg:[&_h2+p]:mb-6"
       >
-        <SpreadLayout ratio="55-45" offset="right-down">
-          {/* 左栏：700 万大字 + 引言；lg:mt-24 让左栏整体下移一个 700 万行高（96px），顶部对齐 700 万字的下沿 */}
-          <div className="lg:mt-24">
+        <SpreadLayout ratio="55-45" offset="none">
+          {/* 左栏略低于右侧小标题，让数字与第一组图形呼应。 */}
+          <div className="lg:mt-6">
             <p className="font-wenkai text-7xl font-thin leading-none text-shx-teal/70 sm:text-8xl">
-              700<span className="text-4xl sm:text-5xl">万</span>
+              <span className="font-normal" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>700</span><span className="text-4xl sm:text-5xl">万</span>
             </p>
             <p className="mt-4 text-base font-light text-moss-ink/60">
               中国约 700 万确诊精神分裂症患者
@@ -507,37 +350,93 @@ export function ShouhuxingBody() {
             <p className="mt-6 max-w-md text-sm font-light leading-7 text-moss-ink/55">
               医疗系统聚焦于患者本身，家属作为实际照护者，长期处于无人支持的真空地带。
             </p>
+            <p className="mt-8 max-w-md text-xs font-light leading-6 text-moss-ink/45">
+              研究方法：专家访谈 · 代理访谈 · 桌面研究。
+              <br />
+              局限：本项目未进行大规模问卷调研，研究深度依赖临床专家中转获取的家属反馈。
+            </p>
           </div>
 
-          {/* 右栏：下移 + 微旋的困境卡片 */}
+          {/* 三种帮助停在不同的缺口：开放排版，短线在疑问前断开。 */}
           <div>
-            <div className="rotate-[-0.5deg] rounded-xl border border-shx-teal/15 bg-shx-card/60 p-6 shadow-sm sm:p-8">
-              <p className="mb-4 text-sm tracking-wide text-moss-ink/50">
-                现有工具的困境
-              </p>
-              <ul className="list-inside list-disc space-y-2 text-moss-ink/70">
-                <li>用药提醒 App → 只解决一个点</li>
-                <li>疾病科普公众号 → 单向信息，无法应对具体场景</li>
-                <li>病友群 → 信息碎片化，缺乏专业指引</li>
-                <li>三者彼此割裂，没有一个为家属设计的完整支持系统</li>
-              </ul>
-            </div>
-            <p className="mt-8 max-w-sm text-sm font-light italic leading-7 text-moss-ink/50">
-              医疗系统一直关注患者。
+            <h3 className="flex items-center justify-end gap-4 text-right font-wenkai text-xl font-normal tracking-wide text-moss-ink/85 sm:text-2xl">
+              <span aria-hidden="true" className="h-px w-20 shrink-0 bg-shx-teal/40 sm:w-32" />
+              <span>现有工具的困境</span>
+            </h3>
+            <ul className="mt-6 space-y-7 lg:mt-4 lg:space-y-5">
+              {[
+                { kind: "medicine", name: "用药提醒 App", help: "提醒吃药", question: "然后该观察什么？", offset: "" },
+                { kind: "article", name: "疾病科普公众号", help: "解释知识", question: "那我家现在属于哪种情况？", offset: "ml-auto w-fit max-w-full" },
+                { kind: "chat", name: "病友群", help: "分享经验", question: "别人的做法适合我们吗？", offset: "sm:ml-3" },
+              ].map((tool) => (
+                <li key={tool.kind} className={tool.offset}>
+                  <div className="flex items-center gap-4">
+                    <span className="relative isolate flex h-12 w-12 shrink-0 items-center justify-center">
+                      <span
+                        aria-hidden="true"
+                        className="absolute -inset-2 -z-10 bg-shx-teal/10"
+                        style={{
+                          borderRadius: tool.kind === "medicine" ? "58% 42% 65% 35% / 45% 58% 42% 55%" : tool.kind === "article" ? "36% 64% 42% 58% / 60% 38% 62% 40%" : "62% 38% 45% 55% / 38% 55% 45% 62%",
+                          transform: tool.kind === "article" ? "rotate(12deg)" : "rotate(-8deg)",
+                        }}
+                      />
+                    <svg
+                      className="h-12 w-12 shrink-0 text-shx-teal/80"
+                      viewBox="0 0 48 48"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      {tool.kind === "medicine" ? (
+                        <>
+                          <path d="M9 27 21 15a7 7 0 0 1 10 10L19 37A7 7 0 0 1 9 27Z" />
+                          <path d="m15 21 10 10" />
+                          <circle cx="34" cy="12" r="9" fill="#e5f4f1" />
+                          <path d="M34 7v5l3 2" />
+                        </>
+                      ) : tool.kind === "article" ? (
+                        <>
+                          <path d="M12 6h18l7 7v29H12Z" />
+                          <path d="M30 6v8h7M18 21h13M18 27h13M18 33h8" />
+                        </>
+                      ) : (
+                        <>
+                          <path d="M7 9h25a4 4 0 0 1 4 4v13a4 4 0 0 1-4 4H17l-9 7v-7H7a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4Z" />
+                          <path d="M36 18h5a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4h-2v5l-7-5h-9M11 17h17M11 23h11" />
+                        </>
+                      )}
+                    </svg>
+                    </span>
+                    <div>
+                      <p className="text-sm font-normal text-moss-ink/85">{tool.name}</p>
+                      <p className="mt-1 text-xs font-light text-moss-ink/55">{tool.help}</p>
+                    </div>
+                  </div>
+                  <div className="ml-6 mt-2 flex items-start gap-3">
+                    <svg className="mt-1 h-6 w-7 shrink-0 text-shx-teal/40" viewBox="0 0 28 24" fill="none" aria-hidden="true">
+                      <path d="M1 1v8q0 8 8 8h8" stroke="currentColor" strokeWidth="1" />
+                      <path d="M21 17h2" stroke="currentColor" strokeLinecap="round" />
+                    </svg>
+                    <p className="pt-1 font-wenkai text-base leading-7 text-moss-ink/75 sm:text-lg">
+                      {tool.question}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-10 text-center font-wenkai text-lg leading-8 text-moss-ink/80 lg:mt-12">
+              信息、提醒、经验都有。
               <br />
-              那谁在照顾照顾者？
+              <span className="text-base font-normal text-[#568d86]">
+                但如何把它们变成今天的照护行动，仍要靠家属自己。
+              </span>
             </p>
           </div>
         </SpreadLayout>
 
-        {/* 脚注带：研究方法，窄、不居中、偏右，像展览墙上贴的说明卡片 */}
-        <div className="ml-auto mt-12 max-w-md">
-          <p className="text-xs font-light leading-6 text-moss-ink/45">
-            研究方法：专家访谈 · 代理访谈 · 桌面研究。
-            <br />
-            局限：本项目未进行大规模问卷调研，研究深度依赖临床专家中转获取的家属反馈。
-          </p>
-        </div>
       </GrowthSection>
 
       <GrowthDivider />
@@ -548,9 +447,9 @@ export function ShouhuxingBody() {
         layout="wide"
       >
         <p className="mb-6 text-moss-ink/60">
-          轻淡地浮在页面上方，像是有人留下的声音。点击其中一句，看看它背后的人。
+          同样是照护，每个人承受的重量并不相同。
         </p>
-        <PersonaQuotes />
+        <CaregiverCarousel people={quotes} />
 
         <SpreadLayout ratio="45-55" offset="right-up" className="mt-16">
           <div className="rounded-xl border border-shx-teal/15 bg-shx-card/50 p-6">

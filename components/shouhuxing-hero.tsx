@@ -6,10 +6,10 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from "react";
 import {
   motion,
+  useMotionValue,
   useScroll,
   useTransform,
   useMotionValueEvent,
@@ -31,7 +31,7 @@ const MotionLink = motion.create(Link);
 /*  家属每天面对、却没有答案的问题                                       */
 /*                                                                      */
 /*  x / y：句子在屏幕上的初始位置，取值范围 0–1（相对于视口宽/高）        */
-/*  fontSize：可选，默认 20。调整位置时注意避开中心区域（螺旋汇聚会吸进去）*/
+/*  fontSize：可选，默认 20。调整位置时注意避开中心区域*/
 /* ------------------------------------------------------------------ */
 
 const SENTENCES = [
@@ -53,6 +53,16 @@ const SENTENCES = [
   { text: "到底有没有希望",         x: 0.65, y: 0.35, fontSize: 28 },
 
 ];
+
+// Seconds on the internal clock; scrolling only starts this clock once.
+const CONVERGE_THRESHOLD = 0.30;
+const SENTENCE_INTERVAL = 0.40;
+const SENTENCE_DURATION = 1.50;
+const DISSOLVE_DURATION = 0.18;
+const LAST_ARRIVAL = (SENTENCES.length - 1) * SENTENCE_INTERVAL + SENTENCE_DURATION;
+const HEARTBEAT_AT = LAST_ARRIVAL + DISSOLVE_DURATION;
+const TITLE_AT = HEARTBEAT_AT + 0.50 + 0.15;
+const SEQUENCE_END = TITLE_AT + 1.22;
 
 const NIGHT = "#152135";
 const MINT = "#e5f4f1";
@@ -115,9 +125,19 @@ function AnimatedTopBar({
 
 function StaticTopBar({ domain }: { domain: Domain }) {
   const textClass = domainTextClass[domain.id];
+  const { scrollY } = useScroll();
+  const maskOpacity = useTransform(scrollY, [0, 80], [0, 1]);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-5 sm:px-10">
+    <header className="fixed left-0 right-0 top-0 z-50 isolate flex items-center justify-between px-6 py-5 sm:px-10">
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 sm:h-32"
+        style={{
+          opacity: maskOpacity,
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.70) 42%, rgba(255,255,255,0.38) 65%, rgba(255,255,255,0) 100%)",
+        }}
+      />
       <Link
         href={`/${domain.id}`}
         className="text-sm font-light tracking-wide text-moss-ink/50 transition-colors duration-500 hover:text-moss-ink"
@@ -241,17 +261,15 @@ function TwinkleStars({ progress }: { progress: MotionValue<number> }) {
 
 function FloatingSentence({
   sentence,
-  progress,
+  elapsed,
   center,
   rank,
-  total,
 }: {
   sentence: { text: string; x: number; y: number; fontSize?: number };
-  progress: MotionValue<number>;
+  elapsed: MotionValue<number>;
   center: { x: number; y: number };
   /** 0-based 排名：0 = 离中心最近，最先进入 */
   rank: number;
-  total: number;
 }) {
   const text = sentence.text;
   const driftRef = useRef<HTMLDivElement>(null);
@@ -274,41 +292,44 @@ function FloatingSentence({
   // 漂移：rAF 直接写 inner transform，不触发 React 重渲染
   useEffect(() => {
     let raf: number;
+    let frozenDrift: { x: number; y: number } | null = null;
     const tick = () => {
       const el = driftRef.current;
       if (el) {
         const t = performance.now();
-        const factor = progress.get() < 0.3 ? 1 : 0;
-        const dx = Math.sin(t * meta.speed + meta.p1) * meta.amp * factor;
-        const dy = Math.cos(t * meta.speed * 1.4 + meta.p2) * meta.amp * 0.85 * factor;
+        const local = elapsed.get() - rank * SENTENCE_INTERVAL;
+        const driftX = Math.sin(t * meta.speed + meta.p1) * meta.amp;
+        const driftY = Math.cos(t * meta.speed * 1.4 + meta.p2) * meta.amp * 0.85;
+        if (local >= 0 && !frozenDrift) frozenDrift = { x: driftX, y: driftY };
+        const factor = 1 - easeInOutCubic(Math.max(0, Math.min(1, local / SENTENCE_DURATION)));
+        const dx = frozenDrift ? frozenDrift.x * factor : driftX;
+        const dy = frozenDrift ? frozenDrift.y * factor : driftY;
         el.style.transform = `rotate(${meta.rotate}deg) translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [meta, progress]);
+  }, [meta, elapsed, rank]);
 
   // 逐个进入中心：最近（rank=0）最早，最远最晚，直线慢飞
-  const staggerDelay = 0.028;
-  const convergeDuration = 0.10;
-  const convergeStart = 0.30 + rank * staggerDelay;
-  const convergeEnd = convergeStart + convergeDuration;
+  const convergeStart = rank * SENTENCE_INTERVAL;
+  const convergeEnd = convergeStart + SENTENCE_DURATION;
 
   // 直线飞入：直接从初始位置平滑移动到中心
-  const x = useTransform(progress, [convergeStart, convergeEnd], [meta.baseX, center.x], {
+  const x = useTransform(elapsed, [convergeStart, convergeEnd], [meta.baseX, center.x], {
     ease: easeInOutCubic,
   });
-  const y = useTransform(progress, [convergeStart, convergeEnd], [meta.baseY, center.y], {
+  const y = useTransform(elapsed, [convergeStart, convergeEnd], [meta.baseY, center.y], {
     ease: easeInOutCubic,
   });
 
   // 抵达中心后消散：在汇聚窗口结束后的 dissolveDuration 内淡出
-  const dissolveDuration = 0.08;
+  const dissolveDuration = DISSOLVE_DURATION;
   const dissolveEnd = convergeEnd + dissolveDuration;
 
   // 完整生命周期：漂浮 → 汇聚（保持不透明） → 消散 → 隐藏
-  const sentenceOpacity = useTransform(progress, (v) => {
+  const sentenceOpacity = useTransform(elapsed, (v) => {
     if (v < convergeStart) return meta.opacity;
     if (v < convergeEnd) return meta.opacity;
     if (v < dissolveEnd) {
@@ -317,7 +338,7 @@ function FloatingSentence({
     }
     return 0;
   });
-  const sentenceScale = useTransform(progress, (v) => {
+  const sentenceScale = useTransform(elapsed, (v) => {
     if (v < convergeEnd) return 1;
     if (v < dissolveEnd) {
       const t = (v - convergeEnd) / dissolveDuration;
@@ -325,7 +346,7 @@ function FloatingSentence({
     }
     return 0.75;
   });
-  const sentenceBlur = useTransform(progress, (v) => {
+  const sentenceBlur = useTransform(elapsed, (v) => {
     if (v < convergeEnd) return 0;
     if (v < dissolveEnd) {
       const t = (v - convergeEnd) / dissolveDuration;
@@ -448,19 +469,19 @@ function ParticleBurst({
 /* ------------------------------------------------------------------ */
 
 function StarGlow({
-  progress,
+  elapsed,
   glowIntensity,
 }: {
-  progress: MotionValue<number>;
+  elapsed: MotionValue<number>;
   /** 0–1，每有一个句子抵达中心就亮一分 */
   glowIntensity: MotionValue<number>;
 }) {
   const [pulsed, setPulsed] = useState(false);
-  useMotionValueEvent(progress, "change", (v) => {
-    if (v > 0.66 && !pulsed) setPulsed(true);
+  useMotionValueEvent(elapsed, "change", (v) => {
+    if (v >= HEARTBEAT_AT && !pulsed) setPulsed(true);
   });
 
-  const baseOpacity = useTransform(progress, [0.62, 0.72], [0, 1]);
+  const baseOpacity = useTransform(glowIntensity, [0, 1 / SENTENCES.length], [0, 1]);
   // 亮度随句子抵达数从 0.35 升到 1.0
   const glowMultiplier = useTransform(glowIntensity, [0, 1], [0.35, 1.0]);
 
@@ -476,10 +497,10 @@ function StarGlow({
         className="relative flex items-center justify-center"
       >
         <motion.span
-          className="absolute h-[60px] w-[60px] rounded-full"
+          className="absolute h-[80px] w-[80px] rounded-full"
           style={{
             background:
-              "radial-gradient(circle, rgba(21,183,168,0.35) 0%, transparent 65%)",
+              "radial-gradient(circle, rgba(116,215,208,0.18) 0%, transparent 70%)",
             opacity: glowMultiplier,
           }}
         />
@@ -487,14 +508,14 @@ function StarGlow({
           className="absolute h-[30px] w-[30px] rounded-full"
           style={{
             background:
-              "radial-gradient(circle, rgba(21,183,168,0.5) 0%, transparent 70%)",
+              "radial-gradient(circle, rgba(178,239,232,0.38) 0%, transparent 70%)",
             opacity: glowMultiplier,
           }}
         />
         <motion.span
-          className="relative h-[14px] w-[14px] rounded-full"
+          className="relative h-[9px] w-[9px] rounded-full"
           style={{
-            background: STAR_CORE,
+            background: "radial-gradient(circle, #f4fffc 0%, #c5f2e9 28%, rgba(136,222,208,0.55) 55%, transparent 75%)",
             opacity: glowMultiplier,
           }}
         />
@@ -518,11 +539,11 @@ function TitleBlock({
   const opacity = useTransform(progress, (v) => (v >= 0.78 ? 1 : v <= 0.66 ? 0 : (v - 0.66) / 0.12));
   const y = useTransform(progress, [0.66, 0.78], [24, 0]);
   const color = "#ffffff";
-  const subColor = "#ffffff";
+  const subColor = "rgba(226,236,244,0.74)";
 
   return (
     <motion.div
-      className="pointer-events-none absolute left-1/2 top-[46%] z-30 w-full -translate-x-1/2 px-6 text-center"
+      className="pointer-events-none absolute left-1/2 top-[42%] z-30 w-full -translate-x-1/2 px-6 text-center"
       style={{ opacity, y }}
     >
       <motion.h1
@@ -532,14 +553,14 @@ function TitleBlock({
         守护星
       </motion.h1>
       <motion.p
-        className="mt-3 text-lg font-light tracking-[0.1em] sm:text-xl"
+        className="mt-5 text-sm font-light tracking-[0.035em] sm:text-base"
         style={{ color: subColor }}
       >
         Supporting the Ones Who Support
       </motion.p>
       <motion.p
-        className="mx-auto mt-2 max-w-md text-sm font-light sm:text-base"
-        style={{ color: subColor }}
+        className="mx-auto mt-4 max-w-md text-xs font-light leading-relaxed sm:text-sm"
+        style={{ color: "rgba(226,236,244,0.58)" }}
       >
         {subtitle}
       </motion.p>
@@ -554,11 +575,14 @@ function TitleBlock({
 function ContinueArrow({
   progress,
   onEnter,
+  ready,
 }: {
   progress: MotionValue<number>;
   onEnter: () => void;
+  ready: boolean;
 }) {
   const opacity = useTransform(progress, [0.85, 0.93], [0, 1]);
+  const color = useTransform(progress, [0.62, 0.80], ["rgba(238,242,247,0.65)", "rgba(40,66,72,0.8)"]);
   const pointer = useTransform(
     progress,
     [0.85, 0.93],
@@ -569,23 +593,23 @@ function ContinueArrow({
     <div className="absolute inset-x-0 bottom-8 z-40 flex justify-center">
       <motion.button
         onClick={onEnter}
+        disabled={!ready}
+        tabIndex={ready ? 0 : -1}
         aria-label="收起深色页面，进入正文"
-        className="animate-float flex flex-col items-center gap-2 text-[#eef2f7] transition-opacity duration-500 hover:opacity-70"
-        style={{ opacity, pointerEvents: pointer }}
+        className="animate-float flex flex-col items-center gap-3 text-[#eef2f7]/65 transition-colors duration-500 hover:text-[#eef2f7]"
+        style={{ opacity, pointerEvents: pointer, color }}
       >
-        <span className="text-sm font-light tracking-[0.2em]">第一章</span>
-        <span className="flex flex-col items-center leading-[0.5]">
-          <span>﹀</span>
-          <span>﹀</span>
-        </span>
+        <span className="text-xs font-light tracking-[0.2em]">第一章</span>
+        <svg width="14" height="8" viewBox="0 0 14 8" fill="none" aria-hidden="true">
+          <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </motion.button>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  滚动驱动 Hero — 400vh：动画放慢约四倍；标题界面锁死滚动，            */
-/*  只能点击箭头收起深色页面进入正文                                    */
+/*  滚动到阈值后固定场景；汇聚完成后停在标题，点击第一章才进入正文       */
 /* ------------------------------------------------------------------ */
 
 function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
@@ -599,8 +623,10 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // 点击箭头后解锁；解锁前滚动到标题界面即被锁死
-  const [unlocked, setUnlocked] = useState(false);
+  const elapsed = useMotionValue(-1);
+  const sceneProgress = useMotionValue(0);
+  const phase = useRef<"waiting" | "running" | "complete" | "entered">("waiting");
+  const [ready, setReady] = useState(false);
 
   const center = useMemo(
     () =>
@@ -616,50 +642,106 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
     [mounted]
   );
 
-  // 标题界面完整呈现（progress 0.93，标题/箭头/背景变浅均已完成）后锁死
-  // 滚动：下滚被 wheel 拦截 + scroll 拉回兜底（键盘等），上滚不受影响
   useEffect(() => {
-    if (unlocked || !mounted) return;
-    const lockAt = window.innerHeight * 3 * 0.93;
-    const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) return; // 保留 Ctrl+滚轮缩放
-      if (e.deltaY > 0 && window.scrollY >= lockAt - 2) {
-        e.preventDefault();
-        if (window.scrollY > lockAt) window.scrollTo(0, lockAt);
+    if (!mounted) return;
+    let raf = 0;
+    let previousTime = 0;
+    const anchor = () => {
+      const element = containerRef.current;
+      const top = element ? element.getBoundingClientRect().top + window.scrollY : 0;
+      return top + window.innerHeight * 3 * CONVERGE_THRESHOLD;
+    };
+    const pin = () => window.scrollTo({ top: anchor(), behavior: "instant" });
+    const tick = (now: number) => {
+      // Pause in background tabs, rather than skipping the story on return.
+      const delta = previousTime ? (now - previousTime) / 1000 : 0;
+      previousTime = now;
+      if (!document.hidden) elapsed.set(Math.min(SEQUENCE_END, elapsed.get() + Math.min(delta, 0.05)));
+      const time = elapsed.get();
+      const times = [0, LAST_ARRIVAL, HEARTBEAT_AT, TITLE_AT, TITLE_AT + 0.6, SEQUENCE_END];
+      const values = [0.30, 0.60, 0.62, 0.66, 0.78, 0.93];
+      let i = 0;
+      while (i < times.length - 2 && time > times[i + 1]) i++;
+      const fraction = Math.min(1, (time - times[i]) / (times[i + 1] - times[i]));
+      sceneProgress.set(values[i] + (values[i + 1] - values[i]) * fraction);
+      if (time < SEQUENCE_END) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        phase.current = "complete";
+        setReady(true);
+        // Keep the finished title pinned until the chapter button is activated.
+        pin();
       }
     };
+    const start = () => {
+      if (phase.current !== "waiting") return;
+      phase.current = "running"; // Synchronous guard against wheel/scroll races.
+      elapsed.set(0);
+      sceneProgress.set(CONVERGE_THRESHOLD);
+      pin();
+      raf = requestAnimationFrame(tick);
+    };
     const onScroll = () => {
-      if (window.scrollY > lockAt) window.scrollTo(0, lockAt);
+      if (phase.current === "entered") return;
+      if (phase.current === "running" || phase.current === "complete") {
+        if (Math.abs(window.scrollY - anchor()) > 1) pin();
+      } else if (window.scrollY >= anchor() - 1) {
+        start();
+      } else {
+        sceneProgress.set(Math.min(CONVERGE_THRESHOLD, scrollYProgress.get()));
+      }
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || phase.current === "entered") return;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+      if (phase.current === "running" || phase.current === "complete" || (delta > 0 && window.scrollY + delta >= anchor())) {
+        event.preventDefault();
+        start();
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey || event.altKey || phase.current === "entered") return;
+      if (!["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(event.key)) return;
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, button, a, [contenteditable]")) return;
+      if (phase.current === "running" || phase.current === "complete" || event.key === "End") {
+        event.preventDefault();
+        start();
+      }
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (phase.current === "running" || phase.current === "complete") event.preventDefault();
     };
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("scroll", onScroll);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    onScroll();
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("touchmove", onTouchMove);
+      // Strict Mode may set up this effect again after cleanup.
+      if (phase.current === "running") phase.current = "waiting";
     };
-  }, [unlocked, mounted]);
+  }, [mounted, elapsed, sceneProgress, scrollYProgress]);
 
   // 收起深色页面：回到顶部，同时折叠 hero，过渡完正文自然在视口里
   const [collapsed, setCollapsed] = useState(false);
   const enterBody = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-    setUnlocked(true);
+    if (phase.current !== "complete") return;
+    phase.current = "entered";
+    window.scrollTo({ top: 0, behavior: "instant" });
     setCollapsed(true);
   }, []);
 
-  // 亮阶段：底部从 NIGHT 渐变到 MINT（alpha 合在色值里，不设 opacity）
-  const brightBg = useTransform(scrollYProgress, (v) => {
+  // 天光从底部升起；标题区域保持深蓝，不叠加椭圆暗角。
+  const brightBg = useTransform(sceneProgress, (v) => {
     const t = v < 0.62 ? 0 : v > 0.80 ? 1 : (v - 0.62) / 0.18;
-    const r = Math.round(0x15 + (0xe5 - 0x15) * t);
-    const g = Math.round(0x21 + (0xf4 - 0x21) * t);
-    const b = Math.round(0x35 + (0xf1 - 0x35) * t);
-    return `linear-gradient(to bottom, ${NIGHT} 0%, ${NIGHT} 38%, rgb(${r},${g},${b}) 88%)`;
-  });
-
-  // 暗阶段：四周压暗晕影（alpha 合在色值里，不设 opacity）
-  const vignetteBg = useTransform(scrollYProgress, (v) => {
-    const a = v < 0.80 ? 0 : v > 0.93 ? 0.7 : ((v - 0.80) / 0.13) * 0.7;
-    return `radial-gradient(ellipse 50% 50% at 50% 40%, transparent 0%, transparent 40%, rgba(0,0,0,${a.toFixed(3)}) 100%)`;
+    const tint = (r: number, g: number, b: number) =>
+      `rgb(${Math.round(21 + (r - 21) * t)},${Math.round(33 + (g - 33) * t)},${Math.round(53 + (b - 53) * t)})`;
+    return `linear-gradient(to bottom, ${NIGHT} 0%, ${NIGHT} 48%, ${tint(40,70,86)} 68%, ${tint(117,158,156)} 85%, ${tint(194,222,212)} 100%)`;
   });
 
   // 句子按距离中心排序：最近的 rank=0，最先进入
@@ -674,19 +756,12 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
     return withDist;
   }, [center.x, center.y, mounted]);
 
-  // 中心亮度：每有一个句子抵达就亮一分
-  const staggerDelay = 0.028;
-  const convergeDuration = 0.10;
-  const centerGlow = useTransform(scrollYProgress, (v) => {
-    let glow = 0;
-    for (let i = 0; i < SENTENCES.length; i++) {
-      const start = 0.30 + i * staggerDelay;
-      const end = start + convergeDuration;
-      if (v >= end) glow += 1;
-      else if (v > start) glow += (v - start) / (end - start);
-    }
-    return glow / SENTENCES.length;
-  });
+  // Only completed arrivals contribute light, one step per sentence.
+  const centerGlow = useTransform(elapsed, (time) =>
+    Math.max(0, Math.min(SENTENCES.length,
+      Math.floor((time - SENTENCE_DURATION + 1e-6) / SENTENCE_INTERVAL) + 1
+    )) / SENTENCES.length
+  );
 
   return (
     <div
@@ -699,15 +774,10 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
           {/* 夜空：纯深色，不用渐变 */}
           <div className="absolute inset-0" style={{ background: NIGHT }} />
 
-          {/* 亮阶段：下方变浅（无 opacity） */}
+          {/* 从深蓝夜空过渡到底部浅青色天光 */}
           <motion.div
             className="absolute inset-0 z-0"
             style={{ background: brightBg }}
-          />
-          {/* 暗阶段：四周压暗晕影（无 opacity；纯黑叠加，不会和夜空色混淆） */}
-          <motion.div
-            className="absolute inset-0 z-[1] pointer-events-none"
-            style={{ background: vignetteBg }}
           />
 
           {/* 噪点纹理 */}
@@ -720,36 +790,35 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
           />
 
           {/* 星点 */}
-          <TwinkleStars progress={scrollYProgress} />
+          <TwinkleStars progress={sceneProgress} />
 
           {/* 漂浮的问题：按距离排序，最近的先进入中心 */}
           {sortedSentences.map((s, i) => (
             <FloatingSentence
               key={s.text}
               sentence={s}
-              progress={scrollYProgress}
+              elapsed={elapsed}
               center={center}
               rank={i}
-              total={SENTENCES.length}
             />
           ))}
 
           {/* 粒子汇聚 */}
-          <ParticleBurst progress={scrollYProgress} center={center} />
+          <ParticleBurst progress={sceneProgress} center={center} />
 
           {/* 星：每个句子抵达时亮一分 */}
-          <StarGlow progress={scrollYProgress} glowIntensity={centerGlow} />
+          <StarGlow elapsed={elapsed} glowIntensity={centerGlow} />
 
           {/* 标题 */}
-          <TitleBlock progress={scrollYProgress} subtitle={project.subtitle} />
+          <TitleBlock progress={sceneProgress} subtitle={project.subtitle} />
 
           {/* 进入正文箭头（停住阶段淡入，点击收起深色页面） */}
-          <ContinueArrow progress={scrollYProgress} onEnter={enterBody} />
+          <ContinueArrow progress={sceneProgress} onEnter={enterBody} ready={ready} />
 
           {/* 顶栏 */}
           <AnimatedTopBar
             domain={domain}
-            progress={scrollYProgress}
+            progress={sceneProgress}
             windowScroll={windowScroll}
             heroEnd={heroEnd}
           />
