@@ -13,6 +13,7 @@ import {
 } from "@/components/shouhuxing-data-viz";
 import { SpreadLayout } from "@/components/spread-layout";
 import { CaregiverCarousel } from "@/components/caregiver-carousel";
+import { CaregivingRivers } from "@/components/caregiving-rivers";
 
 const quotes = [
   {
@@ -56,23 +57,28 @@ const quotes = [
 
 const insights = [
   {
-    text: "家属最大的困难不是「不知道」，而是「不确定自己知道的对不对」。",
+    text: "家属难的不是「不知道」，而是「不确定对不对」。",
+    emphasis: "不确定对不对",
     link: "AI 问答 + 就医分级",
   },
   {
     text: "照护中的焦虑是累积的，夜间尤其。",
+    emphasis: "焦虑是累积的",
     link: "实时 AI + 夜间模式",
   },
   {
-    text: "经验丰富的家属需要的不是更多信息，而是让经验可见的工具。",
+    text: "有经验的家属，需要让经验可见的工具。",
+    emphasis: "让经验可见",
     link: "状态记录 + 趋势图",
   },
   {
     text: "家属自身也是需要被支持的人。",
+    emphasis: "家属自身",
     link: "情绪自评 + 心理资源",
   },
   {
     text: "照护不会只有一个人。",
+    emphasis: "不会只有一个人",
     link: "家庭协作 + 权限管理",
   },
 ];
@@ -177,6 +183,54 @@ const demoSteps = [
 ];
 
 type DemoAction = { tab?: string; page?: string; modal?: boolean };
+
+function ComparisonCard({ comparison, index }: {
+  comparison: (typeof comparisons)[number];
+  index: number;
+}) {
+  const [flipped, setFlipped] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={() => setFlipped((value) => !value)}
+      aria-pressed={flipped}
+      aria-label={`${comparison.scene}：${flipped ? `本方案，${comparison.fresh}。点击查看常规做法` : `常规做法，${comparison.old}。点击查看本方案`}`}
+      className="group w-full cursor-pointer rounded-xl text-left [perspective:1000px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-shx-teal"
+    >
+      <span className="block transition-transform duration-300 ease-out [transform-style:preserve-3d] group-hover:[transform:translateY(-4px)_rotateX(3deg)_rotateY(-6deg)] motion-reduce:transition-none motion-reduce:[transform:none]">
+      <span className={`relative grid rounded-xl transition-transform duration-700 ease-in-out [transform-style:preserve-3d] motion-reduce:transition-none motion-reduce:[transform:none] ${flipped ? "[transform:rotateY(180deg)]" : ""}`}>
+        <span
+          aria-hidden={flipped}
+          className={`col-start-1 row-start-1 flex min-h-[250px] flex-col rounded-xl border border-shx-teal/20 bg-[#fffdf7] p-6 shadow-[0_4px_14px_rgba(62,105,94,0.07)] transition-shadow duration-300 group-hover:shadow-[0_12px_24px_rgba(62,105,94,0.14)] [backface-visibility:hidden] ${flipped ? "motion-reduce:opacity-0" : "motion-reduce:opacity-100"}`}
+        >
+          <span className="flex items-center justify-between text-xs font-light text-moss-ink/40">
+            <span>常规做法</span><span>{String(index + 1).padStart(2, "0")}</span>
+          </span>
+          <span className="mt-6 font-wenkai text-xl text-moss-ink/75">{comparison.scene}</span>
+          <span className="mt-3 text-sm font-light leading-7 text-moss-ink/50">{comparison.old}</span>
+          <span className="mt-auto flex items-center justify-between pt-7 text-xs font-light text-[#568d86]">
+            <span>翻面，看看另一种可能</span><span aria-hidden="true" className="text-lg transition-transform group-hover:rotate-45 motion-reduce:transform-none">↻</span>
+          </span>
+        </span>
+        <span
+          aria-hidden={!flipped}
+          className={`col-start-1 row-start-1 flex min-h-[250px] flex-col rounded-xl border border-white/20 bg-[#15B7A8]/80 p-6 shadow-[0_4px_14px_rgba(62,105,94,0.07)] transition-shadow duration-300 group-hover:shadow-[0_12px_24px_rgba(62,105,94,0.14)] [backface-visibility:hidden] [transform:rotateY(180deg)] motion-reduce:[transform:none] ${flipped ? "motion-reduce:opacity-100" : "motion-reduce:opacity-0"}`}
+        >
+          <span className="flex items-center justify-between text-xs font-light text-white/80">
+            <span>本方案</span><span>{String(index + 1).padStart(2, "0")}</span>
+          </span>
+          <span className="mt-6 font-wenkai text-xl text-white">{comparison.scene}</span>
+          <span className="mt-3 text-sm font-light leading-7 text-white">{comparison.fresh}</span>
+          <span className="mt-auto flex items-center justify-between pt-7 text-xs font-light text-white/80">
+            <span>再点一下，回到正面</span><span aria-hidden="true" className="text-lg">↻</span>
+          </span>
+        </span>
+      </span>
+      </span>
+    </button>
+  );
+}
 
 /* demo 文件在全局暴露的交互函数 */
 type DemoWindow = Window & {
@@ -451,72 +505,37 @@ export function ShouhuxingBody() {
         </p>
         <CaregiverCarousel people={quotes} />
 
-        <SpreadLayout ratio="45-55" offset="right-up" className="mt-16">
-          <div className="rounded-xl border border-shx-teal/15 bg-shx-card/50 p-6">
-            <h3 className="mb-3 font-wenkai text-lg text-moss-ink">
-              河流一：日常照护期
-            </h3>
-            <p className="text-sm leading-7 text-moss-ink/65">
-              起床 → 观察 → 用药 → 不确定 → 搜索/问 → 入睡。情绪曲线在「不确定」处骤降，在「暂时安心」处有小回升。
-            </p>
-          </div>
-          <div className="rounded-xl border border-shx-teal/15 bg-shx-card/50 p-6">
-            <h3 className="mb-3 font-wenkai text-lg text-moss-ink">
-              河流二：危机节点
-            </h3>
-            <p className="text-sm leading-7 text-moss-ink/65">
-              出院/换药决策 → 回家初期 → 波动期 → 稳定/再次危机。情绪在医生交代后陡降，回家第一周持续低位。
-            </p>
-          </div>
-        </SpreadLayout>
+        <CaregivingRivers />
 
         <div className="mt-16">
-          <h3 className="mb-10 font-wenkai text-xl text-moss-ink">
+          <h3 className="mb-6 font-wenkai text-xl text-moss-ink">
             五个核心洞察
           </h3>
-          <div className="space-y-10">
+          <ol className="mx-auto w-full max-w-3xl lg:w-[82%]">
             {insights.map((item, idx) => {
-              const isLeft = idx % 2 === 0;
+              const [before, after] = item.text.split(item.emphasis);
               return (
-                <div
-                  key={idx}
-                  className={`flex ${isLeft ? "justify-start" : "justify-end"}`}
+                <li
+                  key={item.text}
+                  className="relative grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-5 gap-y-3 py-8 sm:gap-x-6 md:grid-cols-[2rem_minmax(0,1fr)_auto] md:gap-x-4"
                 >
-                  <div
-                    className={`max-w-[85%] sm:max-w-[72%] ${
-                      isLeft ? "" : "text-right"
-                    }`}
-                  >
-                    <p className="text-base font-light leading-8 text-moss-ink/80 sm:text-lg sm:leading-9">
-                      {item.text}
-                    </p>
-                    <div
-                      className={`mt-3 flex items-center gap-3 ${
-                        isLeft ? "" : "flex-row-reverse"
-                      }`}
-                    >
-                      <svg
-                        className="h-3 w-12 text-shx-teal/70"
-                        viewBox="0 0 48 12"
-                        fill="none"
-                        aria-hidden
-                      >
-                        <path
-                          d="M2 6 C 14 0.5, 30 11.5, 46 5"
-                          stroke="currentColor"
-                          strokeWidth="1.2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="text-sm text-shx-teal/80">
-                        {item.link}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  <span aria-hidden="true" className="font-wenkai text-2xl font-light text-shx-teal/35">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <p className="text-base font-light leading-8 text-moss-ink/70">
+                    {before}<strong className="font-normal text-moss-ink/90">{item.emphasis}</strong>{after}
+                  </p>
+                  <p className="col-start-2 flex items-baseline gap-2 text-sm font-light leading-7 text-[#568d86] md:col-start-3 md:justify-self-end md:whitespace-nowrap">
+                    <span aria-hidden="true" className="text-shx-teal/60">→</span>
+                    <span>{item.link}</span>
+                  </p>
+                  {idx < insights.length - 1 && (
+                    <span aria-hidden="true" className="absolute bottom-0 left-13 h-px w-12 bg-shx-teal/15 sm:left-14" />
+                  )}
+                </li>
               );
             })}
-          </div>
+          </ol>
         </div>
       </GrowthSection>
 
@@ -527,17 +546,19 @@ export function ShouhuxingBody() {
         subtitle="怎么解决？创新不一定是增加功能，而是让一个功能真的被需要它的人用得上。"
         layout="wide"
       >
-        {/* 三条设计原则：横向三栏，高度故意错落，像展台上摆放的三块说明牌 */}
-        <div className="grid gap-6 md:grid-cols-3">
+        {/* 开放的三栏设计原则，以细竖线分隔。 */}
+        <div className="grid gap-y-8 md:grid-cols-3 md:gap-y-0">
           {principles.map((p, i) => (
             <div
               key={i}
-              className={`rounded-xl border border-shx-teal/15 bg-shx-card/60 p-6 ${
-                i === 1 ? "md:mt-12" : i === 2 ? "md:mt-5" : ""
+              className={`border-l border-shx-teal/25 pl-5 pr-2 md:px-7 lg:px-9 ${
+                i === 0 ? "md:border-l-0 md:pl-0" : ""
               }`}
             >
-              <p className="font-normal text-moss-ink">{p.title}</p>
-              <p className="mt-2 text-sm leading-6 text-moss-ink/60">{p.desc}</p>
+              <p className="font-wenkai text-lg font-normal leading-8 text-[#568d86] lg:text-xl">
+                {p.title}
+              </p>
+              <p className="mt-3 text-sm font-light leading-7 text-moss-ink/60">{p.desc}</p>
             </div>
           ))}
         </div>
@@ -548,32 +569,8 @@ export function ShouhuxingBody() {
             常规做法 vs 本方案
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {comparisons.map((c) => (
-              <div
-                key={c.scene}
-                className="rounded-xl border border-shx-teal/15 bg-white/40 p-5"
-              >
-                <p className="mb-3 text-sm font-medium text-moss-ink/50">
-                  {c.scene}
-                </p>
-                <div className="rounded-lg bg-moss-ink/[0.04] px-3 py-2.5 text-xs leading-5 text-moss-ink/45">
-                  {c.old}
-                </div>
-                <div className="flex justify-center py-1.5 text-shx-teal/60">
-                  <svg className="h-3 w-4" viewBox="0 0 16 12" fill="none" aria-hidden>
-                    <path
-                      d="M8 1 C 8 4, 8 8, 8 11 M4 7 L 8 11 L 12 7"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div className="rounded-lg border border-shx-teal/25 bg-white/50 px-3 py-2.5 text-xs leading-5 text-moss-ink/75">
-                  {c.fresh}
-                </div>
-              </div>
+            {comparisons.map((comparison, index) => (
+              <ComparisonCard key={comparison.scene} comparison={comparison} index={index} />
             ))}
           </div>
         </div>
