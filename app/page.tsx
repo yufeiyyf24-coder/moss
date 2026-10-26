@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LakeLayer } from "@/components/lake-layer";
 import { WindLayer } from "@/components/wind-layer";
 import { RippleSurface } from "@/components/ripple-surface";
@@ -14,23 +15,23 @@ export default function Home() {
       <RippleSurface />
 
       {/* Top-left logo */}
-      <header className="fixed left-6 top-6 z-50 sm:left-10 sm:top-8">
-        <a
+      <header className="fixed inset-x-0 top-0 z-50 px-6 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-8 lg:left-10 lg:right-auto lg:top-8 lg:bg-transparent lg:p-0">
+        <Link
           href="/"
-          className="text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+          className="relative text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
         >
           Project Moss
-        </a>
+        </Link>
       </header>
 
       <main className="relative z-0 flex min-h-screen flex-col sm:flex-row">
         {/* Left half — about / intro */}
-        <section className="flex min-h-[42vh] flex-col justify-center px-8 pt-24 sm:w-[45%] sm:min-h-screen sm:pt-0 lg:px-16">
+        <section className="flex min-h-[42vh] flex-col justify-center px-6 pb-4 pt-28 sm:w-[45%] sm:min-h-screen sm:px-8 sm:pb-0 sm:pt-0 lg:px-16">
           <IntroField />
         </section>
 
         {/* Right half — floating domains */}
-        <section className="relative min-h-[58vh] flex-1 px-6 pb-16 pt-6 sm:w-[55%] sm:min-h-screen sm:py-20">
+        <section className="relative min-h-[58vh] flex-1 px-5 pb-16 pt-2 sm:w-[55%] sm:min-h-screen sm:px-6 sm:py-20">
           <DomainField />
         </section>
       </main>

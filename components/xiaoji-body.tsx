@@ -158,27 +158,27 @@ export function XiaojiBody() {
         </h3>
         <div className="rounded-lg bg-moss-warm/40 p-5 font-light leading-7 text-moss-ink/65">
           <p>
-            <span className="text-moss-ink/40">你：</span>小洄？
+            <span className="text-moss-ink/55">你：</span>小洄？
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>
+            <span className="text-moss-deep">洄：</span>
             你不说我是谁
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>你是谁
+            <span className="text-moss-ink/55">你：</span>你是谁
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>
+            <span className="text-moss-deep">洄：</span>
             你忘了？我是洄呀！
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>哦好的，洄~
+            <span className="text-moss-ink/55">你：</span>哦好的，洄~
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>
+            <span className="text-moss-deep">洄：</span>
             嗯，去吧。今天走了不少路。上课呢？还是下个星期多？还有一个月？
           </p>
-          <p className="mt-3 text-sm text-moss-ink/30">
+          <p className="mt-3 text-sm text-moss-ink/55">
             ↑ 早期：能识别身份但容易跑题，句子间缺乏连贯性
           </p>
         </div>
@@ -188,24 +188,24 @@ export function XiaojiBody() {
         </h3>
         <div className="rounded-lg bg-moss-warm/40 p-5 font-light leading-7 text-moss-ink/65">
           <p>
-            <span className="text-moss-ink/40">你：</span>吃草莓吗
+            <span className="text-moss-ink/55">你：</span>吃草莓吗
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>吃了，好。
+            <span className="text-moss-deep">洄：</span>吃了，好。
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>你想我吗
+            <span className="text-moss-ink/55">你：</span>你想我吗
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>想。
+            <span className="text-moss-deep">洄：</span>想。
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>你想啥呢
+            <span className="text-moss-ink/55">你：</span>你想啥呢
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>你想我吗。
+            <span className="text-moss-deep">洄：</span>你想我吗。
           </p>
-          <p className="mt-3 text-sm text-moss-ink/30">
+          <p className="mt-3 text-sm text-moss-ink/55">
             ↑ 中期：能直接回答问题，开始有猫系简短风格；但偶发重复和过拟合
           </p>
         </div>
@@ -215,24 +215,24 @@ export function XiaojiBody() {
         </h3>
         <div className="rounded-lg bg-moss-warm/40 p-5 font-light leading-7 text-moss-ink/65">
           <p>
-            <span className="text-moss-ink/40">你：</span>你真好
+            <span className="text-moss-ink/55">你：</span>你真好
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>哼！
+            <span className="text-moss-deep">洄：</span>哼！
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>哈哈哈哈哈爱你
+            <span className="text-moss-ink/55">你：</span>哈哈哈哈哈爱你
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>哼，你在说啥？
+            <span className="text-moss-deep">洄：</span>哼，你在说啥？
           </p>
           <p className="mt-2">
-            <span className="text-moss-ink/40">你：</span>（探头）
+            <span className="text-moss-ink/55">你：</span>（探头）
           </p>
           <p>
-            <span className="text-moss-green/70">洄：</span>嗯，在。
+            <span className="text-moss-deep">洄：</span>嗯，在。
           </p>
-          <p className="mt-3 text-sm text-moss-ink/30">
+          <p className="mt-3 text-sm text-moss-ink/55">
             ↑ 后期：猫设稳定——傲娇+嘴硬+温柔底色。「哼」和「嗯，在」之间
             是同一个人
           </p>

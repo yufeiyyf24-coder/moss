@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "@fontsource/dm-sans/300.css";
 import "@fontsource/dm-sans/400.css";
 import "@fontsource/dm-sans/500.css";
@@ -10,6 +10,11 @@ import { TransitionEngine } from "@/components/transition-engine";
 export const metadata: Metadata = {
   title: "Project Moss",
   description: "A place where ideas grow.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f7faf4",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

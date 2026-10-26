@@ -78,7 +78,7 @@ function JourneyFace({ x, y, expression, highlighted }: {
 export function CaregivingRivers() {
   return (
     <div className="mt-16 space-y-14">
-      <p className="text-xs font-light tracking-wide text-moss-ink/45">照护者的情绪旅程 · 基于访谈理解的示意，非量化测量</p>
+      <p className="text-xs font-light tracking-wide text-moss-ink/55">照护者的情绪旅程 · 基于访谈理解的示意，非量化测量</p>
       {rivers.map((river, riverIndex) => {
         const points = river.stages.map((stage, index) => ({ ...stage, x: 85 + (index / (river.stages.length - 1)) * 590 }));
         // Horizontal tangents keep the curve smooth and passing through every node.
@@ -93,7 +93,7 @@ export function CaregivingRivers() {
           <figure key={river.title} className="min-w-0">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="font-wenkai text-lg text-moss-ink sm:text-xl">{river.title}</h3>
-              <p className="text-xs font-light text-moss-ink/45">{river.subtitle}</p>
+              <p className="text-xs font-light text-moss-ink/55">{river.subtitle}</p>
             </div>
             <p className="mt-3 pl-4 text-sm font-light leading-7 text-[#568d86] sm:pl-28">
               {river.opportunity}
@@ -102,7 +102,7 @@ export function CaregivingRivers() {
               <svg viewBox="0 0 760 300" role="img" aria-labelledby={`caregiving-river-${riverIndex}`} className="block w-full min-w-[640px]">
                 {/* SVG title must be one text node for matching server/client markup. */}
                 <title id={`caregiving-river-${riverIndex}`}>{accessibleTitle}</title>
-                <g fill="currentColor" fontSize="11" className="text-moss-ink/40">
+                <g fill="currentColor" fontSize="11" className="text-moss-ink/55">
                   <text x="4" y="65">较安心</text>
                   <text x="4" y="210">较焦虑</text>
                 </g>
@@ -117,7 +117,7 @@ export function CaregivingRivers() {
                     <g key={point.label.join("")}>
                       <path d={`M${point.x} ${point.y + 20}V245`} fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 5" className="text-shx-teal/20" />
                       <JourneyFace x={point.x} y={point.y} expression={point.expression} highlighted={highlighted} />
-                      <text x={point.x} y={point.y - 27} textAnchor="middle" fill="currentColor" fontSize="11" className={highlighted ? "text-moss-ink/80" : "text-moss-ink/50"}>{point.emotion}</text>
+                      <text x={point.x} y={point.y - 27} textAnchor="middle" fill="currentColor" fontSize="11" className={highlighted ? "text-moss-ink/80" : "text-moss-ink/60"}>{point.emotion}</text>
                       <text x={point.x} y="268" textAnchor="middle" fill="currentColor" fontSize="13" className="font-wenkai text-moss-ink/80">
                         {point.label.map((line, lineIndex) => <tspan key={line} x={point.x} dy={lineIndex === 0 ? 0 : 18}>{line}</tspan>)}
                       </text>
@@ -126,7 +126,7 @@ export function CaregivingRivers() {
                 })}
               </svg>
             </div>
-            <p className="mt-1 text-right text-xs text-moss-ink/35 sm:hidden">左右滑动，查看完整旅程 →</p>
+            <p className="mt-1 text-right text-xs text-moss-ink/50 sm:hidden">左右滑动，查看完整旅程 →</p>
             <figcaption className="mt-4 text-sm font-light leading-7">
               <p className="text-moss-ink/60">{river.description}</p>
             </figcaption>

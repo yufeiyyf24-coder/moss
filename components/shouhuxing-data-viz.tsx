@@ -36,7 +36,6 @@ function LineChart({
   yMax,
   ticks,
   baseline,
-  baselineLabel,
   valueLabel,
   xLabels,
   annotations,
@@ -47,7 +46,6 @@ function LineChart({
   yMax: number;
   ticks: number[];
   baseline?: { value: number; label: string };
-  baselineLabel?: string;
   valueLabel: string;
   xLabels: string[];
   annotations?: { index: number; text: string; dy?: number }[];
@@ -99,7 +97,7 @@ function LineChart({
             x={padL - 8}
             y={y(t) + 3}
             textAnchor="end"
-            fontSize={9.5}
+            fontSize={11.5}
             fill={INK}
             fillOpacity={0.45}
           >
@@ -124,7 +122,7 @@ function LineChart({
               x={W - padR}
               y={y(baseline.value) - 5}
               textAnchor="end"
-              fontSize={9.5}
+              fontSize={11.5}
               fill={INK}
               fillOpacity={0.45}
             >
@@ -201,7 +199,7 @@ function LineChart({
             x={x(i)}
             y={H - 14}
             textAnchor="middle"
-            fontSize={9.5}
+            fontSize={11}
             fill={INK}
             fillOpacity={0.5}
           >
@@ -209,7 +207,7 @@ function LineChart({
           </text>
         ))}
       </svg>
-      <p className="mt-2 text-xs font-light leading-6 text-moss-ink/40">
+      <p className="mt-2 text-xs font-light leading-6 text-moss-ink/55">
         {caption}
       </p>
     </div>
@@ -568,7 +566,7 @@ export function WordCloud() {
           );
         })}
       </svg>
-      <p className="mt-2 text-xs font-light leading-6 text-moss-ink/40">
+      <p className="mt-2 text-xs font-light leading-6 text-moss-ink/55">
         词频来自 6 份测试文档的访谈回答 · 词越大越常被提到
       </p>
     </div>

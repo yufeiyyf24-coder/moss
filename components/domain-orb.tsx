@@ -7,6 +7,7 @@ interface DomainOrbProps {
   label: string;
   sub: string;
   href: string;
+  mobileClass: string;
   positionClass: string;
 }
 
@@ -19,7 +20,7 @@ function hashString(str: string) {
   return Math.abs(hash);
 }
 
-export function DomainOrb({ label, sub, href, positionClass }: DomainOrbProps) {
+export function DomainOrb({ label, sub, href, mobileClass, positionClass }: DomainOrbProps) {
   const [hovered, setHovered] = useState(false);
   const { startTransition } = useTransitionContext();
   const orbRef = useRef<HTMLAnchorElement>(null);
@@ -54,7 +55,7 @@ export function DomainOrb({ label, sub, href, positionClass }: DomainOrbProps) {
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`absolute group flex flex-col items-center justify-center rounded-full p-4 sm:p-6 text-center opacity-50 transition-all duration-700 ease-out hover:scale-[1.08] hover:opacity-100 ${positionClass} animate-float`}
+      className={`group absolute flex flex-col items-start px-2 py-1.5 text-left opacity-85 transition-all duration-700 ease-out sm:items-center sm:p-6 sm:text-center sm:opacity-50 sm:rotate-0 sm:hover:scale-[1.08] hover:opacity-100 ${mobileClass} ${positionClass} animate-float`}
       style={{
         ["--float-duration" as string]: `${float.duration}s`,
         ["--float-delay" as string]: `${float.delay}s`,
@@ -65,18 +66,18 @@ export function DomainOrb({ label, sub, href, positionClass }: DomainOrbProps) {
     >
       {/* soft ambient glow that blooms on hover */}
       <div
-        className="absolute inset-0 -z-10 rounded-full opacity-0 blur-2xl transition-opacity duration-1000 group-hover:opacity-80"
+        className="absolute inset-0 -z-10 rounded-full opacity-0 blur-2xl transition-opacity duration-1000 group-hover:opacity-80 max-sm:hidden"
         style={{
           background:
             "radial-gradient(circle at center, rgba(183, 216, 168, 0.9) 0%, transparent 65%)",
         }}
       />
 
-      <span className="whitespace-nowrap text-[clamp(1.35rem,3.2vw,2.5rem)] font-light tracking-wide text-moss-ink/55 transition-colors duration-700 group-hover:text-moss-ink">
+      <span className="max-w-full whitespace-nowrap text-[clamp(1.15rem,5.2vw,1.45rem)] font-light leading-tight tracking-wide text-moss-ink/75 transition-colors duration-700 group-hover:text-moss-ink sm:text-[clamp(1.35rem,3.2vw,2.5rem)] sm:text-moss-ink/55">
         {label}
       </span>
 
-      <span className="mt-1 max-w-[14ch] font-wenkai text-xs font-light text-moss-ink/70 opacity-0 transition-all duration-700 group-hover:opacity-100 sm:text-sm">
+      <span className="mt-0.5 max-w-[14ch] font-wenkai text-[11px] font-light text-moss-ink/60 transition-all duration-700 sm:mt-1 sm:text-sm sm:text-moss-ink/70 sm:opacity-0 sm:group-hover:opacity-100">
         {sub}
       </span>
     </a>

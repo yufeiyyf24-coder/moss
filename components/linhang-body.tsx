@@ -24,12 +24,12 @@ export function LinhangBody() {
       <GrowthSection title="背景洞察" subtitle="4-6 岁：情绪认知发展的关键窗口">
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-3xl font-light text-moss-green">4-6 岁</p>
-            <p className="mt-1 text-xs text-moss-ink/50">情感发展关键期</p>
+            <p className="text-3xl font-light text-moss-deep">4-6 岁</p>
+            <p className="mt-1 text-xs text-moss-ink/60">情感发展关键期</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-3xl font-light text-moss-green">60%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">SEL教育后校园欺凌减少</p>
+            <p className="text-3xl font-light text-moss-deep">60%</p>
+            <p className="mt-1 text-xs text-moss-ink/60">SEL教育后校园欺凌减少</p>
           </div>
         </div>
         <p>
@@ -132,7 +132,7 @@ export function LinhangBody() {
         <div className="relative space-y-0">
           {/* Layer 1 */}
           <div className="rounded-lg bg-moss-warm/40 p-4">
-            <span className="text-xs font-medium text-moss-ink/40">痛点 PAIN</span>
+            <span className="text-xs font-medium text-moss-ink/55">痛点 PAIN</span>
             <p className="mt-1 text-moss-ink/75">
               家长在情绪危机时感到无助与尴尬——需要的不是教育，而是即时的支撑
             </p>
@@ -140,7 +140,7 @@ export function LinhangBody() {
           <div className="py-1 text-center text-moss-ink/25">↓</div>
           {/* Layer 2 */}
           <div className="rounded-lg bg-moss-warm/40 p-4">
-            <span className="text-xs font-medium text-moss-ink/40">洞察 INSIGHT</span>
+            <span className="text-xs font-medium text-moss-ink/55">洞察 INSIGHT</span>
             <p className="mt-1 text-moss-ink/75">
               长期教育方式（绘本、卡片、课程）在危机当下全部失效——
               家长需要的是「此时此刻」能用的东西
@@ -149,7 +149,7 @@ export function LinhangBody() {
           <div className="py-1 text-center text-moss-ink/25">↓</div>
           {/* Layer 3 */}
           <div className="rounded-lg bg-moss-warm/40 p-4">
-            <span className="text-xs font-medium text-moss-ink/40">机会 OPPORTUNITY</span>
+            <span className="text-xs font-medium text-moss-ink/55">机会 OPPORTUNITY</span>
             <p className="mt-1 text-moss-ink/75">
               建立可移动的「家庭情绪急救包」——随身、即时、能在任何场景激活
             </p>
@@ -157,7 +157,7 @@ export function LinhangBody() {
           <div className="py-1 text-center text-moss-ink/25">↓</div>
           {/* Layer 4 */}
           <div className="rounded-lg bg-moss-green/15 p-4">
-            <span className="text-xs font-medium text-moss-green/70">概念 CONCEPT</span>
+            <span className="text-xs font-medium text-moss-deep/70">概念 CONCEPT</span>
             <p className="mt-1 text-moss-ink/80">
               智能监护与路径规划终端——危机预警 + 环境探查 + 语音引导 +
               路线规划，四位一体
@@ -224,7 +224,7 @@ export function LinhangBody() {
             </ul>
           </div>
           <div className="rounded-lg bg-moss-green/15 p-4">
-            <h4 className="font-medium text-moss-green">方案三 ★ 选定</h4>
+            <h4 className="font-medium text-moss-deep">方案三 ★ 选定</h4>
             <ul className="mt-2 space-y-1 text-sm text-moss-ink/60">
               <li>· 类蝴蝶外形</li>
               <li>· 呼吸光圈</li>

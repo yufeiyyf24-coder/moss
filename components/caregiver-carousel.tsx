@@ -45,7 +45,7 @@ function Person({ older = false, color = "#719e96" }: { older?: boolean; color?:
 
 function CaregiverPortrait({ kind }: { kind: string }) {
   return (
-    <svg viewBox="0 0 260 260" className="h-28 w-28 sm:h-48 sm:w-48" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 260 260" className="h-16 w-16 sm:h-32 sm:w-32 lg:h-48 lg:w-48" fill="none" aria-hidden="true">
       <path d="M38 68C57 26 125 19 175 35c54 17 78 66 61 120-17 57-61 89-122 78-60-10-101-52-88-106Z" fill={kind === "b" ? "#e4e8d7" : "#d8e9e3"} />
       <path d="M218 211c-4-33-2-54 13-78m-11 58c-15-5-21-13-20-23 13 2 21 11 20 23m3-19c14-4 21-11 22-22-13 1-21 10-22 22" stroke="#9fbaaa" strokeWidth="2" strokeLinecap="round" />
       {kind === "c" ? (
@@ -145,7 +145,7 @@ export function CaregiverCarousel({ people }: { people: Caregiver[] }) {
                   <div className="flex items-center gap-3 lg:flex-col lg:items-start lg:gap-0">
                     <div className="-ml-3 shrink-0"><CaregiverPortrait kind={person.id} /></div>
                     <div>
-                      <p className="text-[10px] tracking-[0.16em] text-[#568d86]">{person.id === "c" ? "共通处境" : "照护者画像"}</p>
+                      <p className="text-[11px] tracking-[0.16em] text-[#568d86]">{person.id === "c" ? "共通处境" : "照护者画像"}</p>
                       <h3 className="mt-2 font-wenkai text-2xl text-moss-ink sm:text-3xl">{person.name}</h3>
                       <p className="mt-2 flex flex-wrap gap-x-2 text-xs leading-6 text-moss-ink/60">
                         {person.age && <span className="whitespace-nowrap">{person.age}</span>}

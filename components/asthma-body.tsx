@@ -2,6 +2,43 @@
 
 import { GrowthSection, GrowthDivider } from "@/components/growth-node";
 
+/* 表格在手机端改为卡片，数据源保持一份 */
+type Competitor = {
+  name: string;
+  metrics: string;
+  mode: string;
+  alert: string;
+  form: string;
+  highlight?: boolean;
+};
+
+const competitors: Competitor[] = [
+  { name: "Airthings", metrics: "PM2.5/CO₂/VOC/温湿/氡", mode: "APP查看", alert: "有", form: "科技感" },
+  { name: "Birdie 2.0", metrics: "CO₂", mode: "小鸟物理下落", alert: "无", form: "家居装饰" },
+  { name: "Awair", metrics: "PM2.5/CO₂/VOC/温湿", mode: "APP+屏幕", alert: "有", form: "科技感" },
+  { name: "青萍", metrics: "PM2.5/CO₂/温湿", mode: "屏幕显示", alert: "无", form: "简约电子" },
+  { name: "本项目", metrics: "PM/CO₂/VOC/甲醛/温湿/噪声", mode: "光语言+APP", alert: "主动预警", form: "家居装饰品", highlight: true },
+];
+
+const sensors = [
+  { metric: "PM2.5/PM10", model: "攀藤 PMS5003", principle: "激光散射", price: "¥70-85" },
+  { metric: "温湿度", model: "BME280 / AHT21", principle: "数字 I²C", price: "¥10-20" },
+  { metric: "TVOC/eCO₂", model: "ENS160", principle: "MOX 半导体", price: "¥15-25" },
+  { metric: "甲醛", model: "煊康 ZE08-CH2O", principle: "电化学", price: "¥60-80" },
+  { metric: "CO₂", model: "Sensirion SCD40", principle: "光声式", price: "¥65-80" },
+];
+
+const priorities = [
+  { level: "P0", module: "主动预警", feature: "空气质量异常时自动灯光+APP推送" },
+  { level: "P0", module: "无感监测", feature: "24小时自动运行，不需要用户查看" },
+  { level: "P0", module: "一键求助", feature: "物理SOS按钮 → 自动通知紧急联系人" },
+  { level: "P0", module: "行动指导", feature: "不只显示数字，给出具体操作建议" },
+  { level: "P1", module: "手机APP", feature: "远程查看、历史数据、症状记录" },
+  { level: "P1", module: "通风建议", feature: "综合天气+室内数据，建议是否开窗" },
+  { level: "P1", module: "症状追踪", feature: "简单记录症状 → 生成环境关联分析" },
+  { level: "P2", module: "多房间覆盖", feature: "多设备组网，全屋空气质量热力图" },
+];
+
 export function AsthmaBody() {
   return (
     <>
@@ -10,10 +47,10 @@ export function AsthmaBody() {
           一款手掌大小的家居空气质量监测设备。核心理念：把不可见的空气风险
           翻译成直觉可感知的光，让监测不再需要「主动去看」。
         </p>
-        <p className="mt-2 text-sm text-moss-ink/40">
+        <p className="mt-2 text-sm text-moss-ink/55">
           * 与张如合作的小组课程项目。本人负责：调查问卷设计与数据分析、硬件原型搭建（传感器选型/面包板验证/BOM核算），用户研究与竞品分析各承担一半。
         </p>
-        <p className="mt-4 text-xl font-light italic text-moss-green/80">
+        <p className="mt-4 text-xl font-light italic text-moss-deep/90">
           「How might we dissolve the boundaries between medical intervention
           and domestic tranquility?」
         </p>
@@ -23,18 +60,18 @@ export function AsthmaBody() {
 
       {/* 问题背景 */}
       <GrowthSection title="问题背景" subtitle="一个被忽视的日常">
-        <div className="mb-6 grid grid-cols-3 gap-4">
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-3xl font-light text-moss-green">81.8%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">家中无检测设备</p>
+        <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="rounded-lg bg-moss-warm/30 p-3 text-center sm:p-4">
+            <p className="text-2xl font-light text-moss-ink sm:text-3xl">81.8%</p>
+            <p className="mt-1 text-[11px] leading-4 text-moss-ink/60 sm:text-xs">家中无检测设备</p>
           </div>
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-3xl font-light text-moss-green">4.5%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">主动监测空气质量</p>
+          <div className="rounded-lg bg-moss-warm/30 p-3 text-center sm:p-4">
+            <p className="text-2xl font-light text-moss-ink sm:text-3xl">4.5%</p>
+            <p className="mt-1 text-[11px] leading-4 text-moss-ink/60 sm:text-xs">主动监测空气质量</p>
           </div>
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-3xl font-light text-moss-green">50.7%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">现有APP基于CBT</p>
+          <div className="rounded-lg bg-moss-warm/30 p-3 text-center sm:p-4">
+            <p className="text-2xl font-light text-moss-ink sm:text-3xl">50.7%</p>
+            <p className="mt-1 text-[11px] leading-4 text-moss-ink/60 sm:text-xs">现有APP基于CBT</p>
           </div>
         </div>
         <p>
@@ -51,20 +88,20 @@ export function AsthmaBody() {
         <h3 className="mb-3 text-base font-medium text-moss-ink/80">受访者画像</h3>
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
-            <p className="text-xl font-light text-moss-green">72.7%</p>
-            <p className="text-xs text-moss-ink/50">女性</p>
+            <p className="text-xl font-light text-moss-ink">72.7%</p>
+            <p className="text-xs text-moss-ink/60">女性</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
-            <p className="text-xl font-light text-moss-green">59.1%</p>
-            <p className="text-xs text-moss-ink/50">30-50岁</p>
+            <p className="text-xl font-light text-moss-ink">59.1%</p>
+            <p className="text-xs text-moss-ink/60">30-50岁</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
-            <p className="text-xl font-light text-moss-green">86.4%</p>
-            <p className="text-xs text-moss-ink/50">与家人同住</p>
+            <p className="text-xl font-light text-moss-ink">86.4%</p>
+            <p className="text-xs text-moss-ink/60">与家人同住</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
-            <p className="text-xl font-light text-moss-green">81.8%</p>
-            <p className="text-xs text-moss-ink/50">轻度患者</p>
+            <p className="text-xl font-light text-moss-ink">81.8%</p>
+            <p className="text-xs text-moss-ink/60">轻度患者</p>
           </div>
         </div>
 
@@ -113,7 +150,40 @@ export function AsthmaBody() {
 
       {/* 竞品 */}
       <GrowthSection title="竞品分析" subtitle="现有产品：「只显示数字，不指导行动」">
-        <div className="overflow-x-auto">
+        {/* 手机 / 平板竖屏：每个产品一张卡，避免五列表格横向滚动 */}
+        <div className="space-y-3 md:hidden">
+          {competitors.map((c) => (
+            <div
+              key={c.name}
+              className={`rounded-xl border p-4 ${
+                c.highlight ? "border-moss-green/35 bg-moss-green/[0.06]" : "border-moss-warm/70"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h4 className={`text-sm font-medium ${c.highlight ? "text-moss-deep" : "text-moss-ink/80"}`}>
+                  {c.name}
+                </h4>
+                {c.highlight && (
+                  <span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-[11px] text-moss-deep">
+                    本方案
+                  </span>
+                )}
+              </div>
+              <dl className="mt-3 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs leading-6">
+                <dt className="text-moss-ink/60">检测指标</dt>
+                <dd className="text-moss-ink/75">{c.metrics}</dd>
+                <dt className="text-moss-ink/60">交互方式</dt>
+                <dd className="text-moss-ink/75">{c.mode}</dd>
+                <dt className="text-moss-ink/60">主动推送</dt>
+                <dd className="text-moss-ink/75">{c.alert}</dd>
+                <dt className="text-moss-ink/60">外观定位</dt>
+                <dd className="text-moss-ink/75">{c.form}</dd>
+              </dl>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-moss-green/20">
@@ -124,46 +194,29 @@ export function AsthmaBody() {
                 <th className="py-2 pr-3 font-medium text-moss-ink/60">外观定位</th>
               </tr>
             </thead>
-            <tbody className="text-moss-ink/60">
-              <tr className="border-b border-moss-warm/50">
-                <td className="py-3 font-medium text-moss-ink/75">Airthings</td>
-                <td className="py-3">PM2.5/CO₂/VOC/温湿/氡</td>
-                <td className="py-3">APP查看</td>
-                <td className="py-3">有</td>
-                <td className="py-3">科技感</td>
-              </tr>
-              <tr className="border-b border-moss-warm/50">
-                <td className="py-3 font-medium text-moss-ink/75">Birdie 2.0</td>
-                <td className="py-3">CO₂</td>
-                <td className="py-3">小鸟物理下落</td>
-                <td className="py-3">无</td>
-                <td className="py-3">家居装饰</td>
-              </tr>
-              <tr className="border-b border-moss-warm/50">
-                <td className="py-3 font-medium text-moss-ink/75">Awair</td>
-                <td className="py-3">PM2.5/CO₂/VOC/温湿</td>
-                <td className="py-3">APP+屏幕</td>
-                <td className="py-3">有</td>
-                <td className="py-3">科技感</td>
-              </tr>
-              <tr className="border-b border-moss-warm/50">
-                <td className="py-3 font-medium text-moss-ink/75">青萍</td>
-                <td className="py-3">PM2.5/CO₂/温湿</td>
-                <td className="py-3">屏幕显示</td>
-                <td className="py-3">无</td>
-                <td className="py-3">简约电子</td>
-              </tr>
-              <tr>
-                <td className="py-3 font-medium text-moss-green">本项目</td>
-                <td className="py-3 text-moss-green/80">PM/CO₂/VOC/甲醛/温湿/噪声</td>
-                <td className="py-3 text-moss-green/80">光语言+APP</td>
-                <td className="py-3">
-                  <span className="rounded-full bg-moss-green/15 px-2 py-0.5 text-xs text-moss-green">
-                    主动预警
-                  </span>
-                </td>
-                <td className="py-3 text-moss-green/80">家居装饰品</td>
-              </tr>
+            <tbody className="text-moss-ink/65">
+              {competitors.map((c) => (
+                <tr
+                  key={c.name}
+                  className={`border-b border-moss-warm/50 ${c.highlight ? "bg-moss-green/[0.06]" : ""}`}
+                >
+                  <td className={`py-3 font-medium ${c.highlight ? "text-moss-deep" : "text-moss-ink/80"}`}>
+                    {c.name}
+                  </td>
+                  <td className="py-3">{c.metrics}</td>
+                  <td className="py-3">{c.mode}</td>
+                  <td className="py-3">
+                    {c.highlight ? (
+                      <span className="rounded-full bg-moss-green/15 px-2 py-0.5 text-xs text-moss-deep">
+                        {c.alert}
+                      </span>
+                    ) : (
+                      c.alert
+                    )}
+                  </td>
+                  <td className="py-3">{c.form}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -214,7 +267,7 @@ export function AsthmaBody() {
             <span className="text-lg">🏠</span>
             <div>
               <h4 className="font-medium text-moss-ink/80">居家主机</h4>
-              <p className="text-sm text-moss-ink/50">
+              <p className="text-sm text-moss-ink/60">
                 织物包裹的主监测设备，放在床头/客厅/厨房
               </p>
             </div>
@@ -223,7 +276,7 @@ export function AsthmaBody() {
             <span className="text-lg">📡</span>
             <div>
               <h4 className="font-medium text-moss-ink/80">分类子节点</h4>
-              <p className="text-sm text-moss-ink/50">
+              <p className="text-sm text-moss-ink/60">
                 布置在多个房间，覆盖全屋监测
               </p>
             </div>
@@ -232,7 +285,7 @@ export function AsthmaBody() {
             <span className="text-lg">📱</span>
             <div>
               <h4 className="font-medium text-moss-ink/80">随身分身</h4>
-              <p className="text-sm text-moss-ink/50">
+              <p className="text-sm text-moss-ink/60">
                 出门在外也能查看家中空气质量，接收预警
               </p>
             </div>
@@ -241,7 +294,7 @@ export function AsthmaBody() {
             <span className="text-lg">📊</span>
             <div>
               <h4 className="font-medium text-moss-ink/80">APP 端</h4>
-              <p className="text-sm text-moss-ink/50">
+              <p className="text-sm text-moss-ink/60">
                 7 大功能模块：Atmosphere / Invisible Triggers / Breathing
                 Companion / Body×Environment / Care Circle / Learn Through
                 Living / AI Reflection
@@ -255,7 +308,28 @@ export function AsthmaBody() {
 
       {/* 功能优先级 */}
       <GrowthSection title="功能优先级">
-        <div className="overflow-x-auto">
+        {/* 手机端：优先级卡片，避免三列表格挤压 */}
+        <div className="space-y-2.5 sm:hidden">
+          {priorities.map((item) => (
+            <div key={item.module} className="rounded-lg bg-moss-warm/30 p-4">
+              <div className="flex items-baseline gap-2.5">
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                    item.level === "P0"
+                      ? "bg-moss-green/20 text-moss-deep"
+                      : "bg-moss-ink/10 text-moss-ink/55"
+                  }`}
+                >
+                  {item.level}
+                </span>
+                <h4 className="text-sm font-medium text-moss-ink/80">{item.module}</h4>
+              </div>
+              <p className="mt-1.5 text-sm leading-6 text-moss-ink/65">{item.feature}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-moss-green/20">
@@ -266,42 +340,42 @@ export function AsthmaBody() {
             </thead>
             <tbody className="text-moss-ink/60">
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-green">P0</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-ink">P0</span></td>
                 <td className="py-2">主动预警</td>
                 <td className="py-2">空气质量异常时自动灯光+APP推送</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-green">P0</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-ink">P0</span></td>
                 <td className="py-2">无感监测</td>
                 <td className="py-2">24小时自动运行，不需要用户查看</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-green">P0</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-ink">P0</span></td>
                 <td className="py-2">一键求助</td>
                 <td className="py-2">物理SOS按钮 → 自动通知紧急联系人</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-green">P0</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-green/20 px-2 py-0.5 text-xs font-medium text-moss-ink">P0</span></td>
                 <td className="py-2">行动指导</td>
                 <td className="py-2">不只显示数字，给出具体操作建议</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/50">P1</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/60">P1</span></td>
                 <td className="py-2">手机APP</td>
                 <td className="py-2">远程查看、历史数据、症状记录</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/50">P1</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/60">P1</span></td>
                 <td className="py-2">通风建议</td>
                 <td className="py-2">综合天气+室内数据，建议是否开窗</td>
               </tr>
               <tr className="border-b border-moss-warm/50">
-                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/50">P1</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-ink/15 px-2 py-0.5 text-xs text-moss-ink/60">P1</span></td>
                 <td className="py-2">症状追踪</td>
                 <td className="py-2">简单记录症状 → 生成环境关联分析</td>
               </tr>
               <tr>
-                <td className="py-2"><span className="rounded-full bg-moss-ink/10 px-2 py-0.5 text-xs text-moss-ink/40">P2</span></td>
+                <td className="py-2"><span className="rounded-full bg-moss-ink/10 px-2 py-0.5 text-xs text-moss-ink/55">P2</span></td>
                 <td className="py-2">多房间覆盖</td>
                 <td className="py-2">多设备组网，全屋空气质量热力图</td>
               </tr>
@@ -318,27 +392,27 @@ export function AsthmaBody() {
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
             <div className="mx-auto mb-2 h-8 w-8 rounded-full bg-[#d4e8d4] shadow-[0_0_12px_rgba(180,210,180,0.5)]" />
             <p className="text-xs font-medium text-moss-ink/70">待机</p>
-            <p className="text-xs text-moss-ink/40">冷白 · 常亮</p>
+            <p className="text-xs text-moss-ink/55">冷白 · 常亮</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
             <div className="mx-auto mb-2 h-8 w-8 rounded-full bg-[#7d9b6a] shadow-[0_0_12px_rgba(125,155,106,0.5)]" />
             <p className="text-xs font-medium text-moss-ink/70">良好</p>
-            <p className="text-xs text-moss-ink/40">苔绿 · 6s慢呼吸</p>
+            <p className="text-xs text-moss-ink/55">苔绿 · 6s慢呼吸</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
             <div className="mx-auto mb-2 h-8 w-8 rounded-full bg-[#d4a84b] shadow-[0_0_12px_rgba(212,168,75,0.5)]" />
             <p className="text-xs font-medium text-moss-ink/70">轻度超标</p>
-            <p className="text-xs text-moss-ink/40">琥珀 · 3s呼吸</p>
+            <p className="text-xs text-moss-ink/55">琥珀 · 3s呼吸</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
             <div className="mx-auto mb-2 h-8 w-8 rounded-full bg-[#d4784b] shadow-[0_0_12px_rgba(212,120,75,0.5)]" />
             <p className="text-xs font-medium text-moss-ink/70">中度超标</p>
-            <p className="text-xs text-moss-ink/40">暖橙 · 1.5s呼吸</p>
+            <p className="text-xs text-moss-ink/55">暖橙 · 1.5s呼吸</p>
           </div>
-          <div className="rounded-lg bg-moss-warm/30 p-3 text-center">
+          <div className="col-span-2 rounded-lg bg-moss-warm/30 p-3 text-center sm:col-span-1">
             <div className="mx-auto mb-2 h-8 w-8 rounded-full bg-[#d45a5a] shadow-[0_0_12px_rgba(212,90,90,0.5)]" />
             <p className="text-xs font-medium text-moss-ink/70">严重</p>
-            <p className="text-xs text-moss-ink/40">珊瑚红 · 快闪</p>
+            <p className="text-xs text-moss-ink/55">珊瑚红 · 快闪</p>
           </div>
         </div>
         <div className="rounded-lg bg-moss-warm/30 p-4">
@@ -357,7 +431,22 @@ export function AsthmaBody() {
       {/* 硬件 */}
       <GrowthSection title="硬件与工程" subtitle="原型搭建 · BOM · 传感器选型">
         <h3 className="mb-3 text-base font-medium text-moss-ink/80">传感器配置</h3>
-        <div className="overflow-x-auto">
+        {/* 手机端：按传感器拆卡 */}
+        <div className="space-y-2.5 md:hidden">
+          {sensors.map((s) => (
+            <div key={s.metric} className="rounded-lg bg-moss-warm/30 p-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <h4 className="text-sm font-medium text-moss-ink/80">{s.metric}</h4>
+                <span className="shrink-0 text-sm text-moss-ink/80">{s.price}</span>
+              </div>
+              <p className="mt-1 text-xs leading-6 text-moss-ink/55">
+                {s.model} · {s.principle}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-moss-green/20">
@@ -403,18 +492,18 @@ export function AsthmaBody() {
         </div>
 
         <h3 className="mb-3 mt-8 text-base font-medium text-moss-ink/80">BOM 成本</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-sm text-moss-ink/50">原型散买（1台）</p>
-            <p className="text-2xl font-light text-moss-green">¥300–420</p>
-            <p className="mt-1 text-xs text-moss-ink/40">
+            <p className="text-sm text-moss-ink/60">原型散买（1台）</p>
+            <p className="text-2xl font-light text-moss-ink">¥300–420</p>
+            <p className="mt-1 text-xs text-moss-ink/55">
               传感器 ¥140-185 + CO₂ ¥65-80 + 主控 ¥25-35 + 交互 ¥25-40 + 电源 ¥30-50 + 外壳 ¥15-30
             </p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-sm text-moss-ink/50">量产估算（1000台）</p>
-            <p className="text-2xl font-light text-moss-green">¥145–220</p>
-            <p className="mt-1 text-xs text-moss-ink/40">
+            <p className="text-sm text-moss-ink/60">量产估算（1000台）</p>
+            <p className="text-2xl font-light text-moss-ink">¥145–220</p>
+            <p className="mt-1 text-xs text-moss-ink/55">
               对比市面竞品 ¥500-1500 零售价，成本空间健康
             </p>
           </div>
@@ -451,7 +540,7 @@ export function AsthmaBody() {
             <h4 className="text-sm font-medium text-moss-ink/70">
               阶段 1：裸板传感器验证（¥400 以内，1-2 周）✅ 已完成
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               面包板跑通所有传感器，确认数据可用，PMS5003 / ENS160 / AHT21
               均正常读取
             </p>
@@ -460,7 +549,7 @@ export function AsthmaBody() {
             <h4 className="text-sm font-medium text-moss-ink/70">
               阶段 2：PCB 集成原型（¥200-300，1-2 周）
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               定制 PCB，解决 I²C 总线冲突、PM 传感器独立供电、布局与外壳对应
             </p>
           </div>
@@ -468,7 +557,7 @@ export function AsthmaBody() {
             <h4 className="text-sm font-medium text-moss-ink/70">
               阶段 3：外壳集成原型（¥50-100，1 周）
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               3D 打印外壳，PCB 装进去，验证气流、散热、交互
             </p>
           </div>
@@ -476,7 +565,7 @@ export function AsthmaBody() {
             <h4 className="text-sm font-medium text-moss-ink/70">
               阶段 4：用户验证原型（¥100-200）
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               小批量打印 3-5 台，从问卷受访者中招募目标用户试用 1-2 周
             </p>
           </div>
@@ -487,21 +576,21 @@ export function AsthmaBody() {
 
       <GrowthSection title="下一步">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
+          <div className="rounded-lg bg-moss-warm/30 p-4 text-left sm:text-center">
             <p className="text-sm font-medium text-moss-ink/70">3D 打印外壳集成</p>
-            <p className="mt-1 text-xs text-moss-ink/45">
+            <p className="mt-1 text-xs text-moss-ink/55">
               PCB 装入外壳，验证气流和散热
             </p>
           </div>
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
+          <div className="rounded-lg bg-moss-warm/30 p-4 text-left sm:text-center">
             <p className="text-sm font-medium text-moss-ink/70">APP 界面视觉设计</p>
-            <p className="mt-1 text-xs text-moss-ink/45">
+            <p className="mt-1 text-xs text-moss-ink/55">
               7 大模块的信息架构与视觉落地
             </p>
           </div>
-          <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
+          <div className="rounded-lg bg-moss-warm/30 p-4 text-left sm:text-center">
             <p className="text-sm font-medium text-moss-ink/70">用户测试招募</p>
-            <p className="mt-1 text-xs text-moss-ink/45">
+            <p className="mt-1 text-xs text-moss-ink/55">
               从问卷受访者中招募，验证核心假设
             </p>
           </div>

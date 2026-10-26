@@ -64,7 +64,7 @@ function ProjectEntry({
             {project.title}
           </h3>
 
-          <p className="mt-2 text-sm font-light leading-relaxed text-moss-ink/45 transition-colors duration-700 group-hover:text-moss-ink/65 sm:text-base">
+          <p className="mt-2 text-sm font-light leading-relaxed text-moss-ink/55 transition-colors duration-700 group-hover:text-moss-ink/70 sm:text-base">
             {project.subtitle}
           </p>
         </div>
@@ -125,7 +125,7 @@ export function DomainDirectory({ domain }: { domain: Domain }) {
         {/* Left half — domain identity */}
         <section className="flex min-h-[35vh] flex-col justify-center px-8 pt-28 sm:fixed sm:bottom-0 sm:left-0 sm:top-0 sm:w-[40%] sm:min-h-screen sm:pt-0 lg:px-16">
           <div className="sm:max-w-sm lg:max-w-md">
-            <span className="mb-4 inline-block text-xs font-light tracking-[0.2em] text-moss-ink/35 sm:text-sm">
+            <span className="mb-4 inline-block text-xs font-light tracking-[0.2em] text-moss-ink/50 sm:text-sm">
               {domain.label.toUpperCase()}
             </span>
 
@@ -133,11 +133,11 @@ export function DomainDirectory({ domain }: { domain: Domain }) {
               {domain.label}
             </h1>
 
-            <p className="mt-3 font-wenkai text-xl text-moss-ink/45 sm:text-2xl">
+            <p className="mt-3 font-wenkai text-xl text-moss-ink/55 sm:text-2xl">
               {domain.sub}
             </p>
 
-            <p className="mt-8 text-sm font-light leading-7 text-moss-ink/50 sm:text-base sm:leading-8">
+            <p className="mt-8 text-sm font-light leading-7 text-moss-ink/60 sm:text-base sm:leading-8">
               {domain.description}
             </p>
           </div>
@@ -147,7 +147,7 @@ export function DomainDirectory({ domain }: { domain: Domain }) {
         <section className="min-h-[50vh] flex-1 px-6 pb-24 pt-6 sm:ml-[40%] sm:min-h-screen sm:py-28 sm:pr-10 lg:pr-20">
           {projects.length > 0 ? (
             <>
-              <p className="mb-2 text-xs font-light tracking-[0.15em] text-moss-ink/30">
+              <p className="mb-2 text-xs font-light tracking-[0.15em] text-moss-ink/55">
                 项目 · {projects.length}
               </p>
 
@@ -163,7 +163,7 @@ export function DomainDirectory({ domain }: { domain: Domain }) {
             </>
           ) : (
             <div className="flex h-full items-center">
-              <p className="font-wenkai text-lg font-light italic leading-relaxed text-moss-ink/25 sm:text-xl">
+              <p className="font-wenkai text-lg font-light italic leading-relaxed text-moss-ink/55 sm:text-xl">
                 这个领域还没有项目，
                 <br />
                 种子正在土壤里等待发芽。

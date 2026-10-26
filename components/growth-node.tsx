@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Project, Domain, domainTextClass, domainBgClass } from "@/lib/content";
+import { Project, Domain, domainBgClass } from "@/lib/content";
 
 export function GrowthNode({
   project,
@@ -16,7 +16,6 @@ export function GrowthNode({
   /** 自定义 hero——提供时跳过默认顶栏与 hero 区，由 hero 组件自行处理 */
   hero?: React.ReactNode;
 }) {
-  const textClass = domainTextClass[domain.id];
   const bgClass = domainBgClass[domain.id];
 
   if (hero) {
@@ -31,26 +30,34 @@ export function GrowthNode({
   return (
     <article className="relative z-10 min-h-screen">
       {/* top navigation bar */}
-      <div className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between px-6 py-5 backdrop-blur-[2px] sm:px-10">
-        <Link
-          href={`/${domain.id}`}
-          className="text-sm font-light tracking-wide text-moss-ink/50 transition-colors duration-500 hover:text-moss-ink"
-        >
-          ← 回到 {domain.label}
-        </Link>
-        <span className="flex items-center gap-5">
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-light ${bgClass}/10 ${textClass}`}
-          >
-            {domain.sub}
-          </span>
+      <div className="fixed inset-x-0 top-0 z-40 px-5 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-10 lg:py-5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 hidden h-28 bg-gradient-to-b from-white via-white/85 to-transparent lg:block"
+        />
+        <div className="relative flex items-center justify-between gap-3">
           <Link
-            href="/"
-            className="text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+            href={`/${domain.id}`}
+            className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
           >
-            Project Moss
+            <span className="sm:hidden">← {domain.label}</span>
+            <span className="hidden sm:inline">← 回到 {domain.label}</span>
           </Link>
-        </span>
+          <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+            <span
+              className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
+            >
+              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
+              {domain.sub}
+            </span>
+            <Link
+              href="/"
+              className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+            >
+              Project Moss
+            </Link>
+          </span>
+        </div>
       </div>
 
       {/* hero */}
@@ -61,9 +68,8 @@ export function GrowthNode({
           transition={{ duration: 0.9, ease: [0.2, 0, 0.2, 1] }}
           className="max-w-4xl"
         >
-          <span
-            className={`mb-5 inline-block text-xs font-medium tracking-[0.2em] ${textClass}`}
-          >
+          <span className="mb-5 flex items-center gap-2 text-xs font-medium tracking-[0.2em] text-moss-ink/55">
+            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
             {domain.label.toUpperCase()} / {project.status === "growing" ? "正在生长" : project.status === "seed" ? "种子" : "根系"}
           </span>
 
@@ -75,7 +81,7 @@ export function GrowthNode({
             {project.subtitle}
           </p>
 
-          <p className="max-w-2xl text-base font-light leading-7 text-moss-ink/60 sm:text-lg sm:leading-8">
+          <p className="max-w-2xl text-base font-light leading-7 text-moss-ink/65 sm:text-lg sm:leading-8">
             {project.summary}
           </p>
         </motion.div>
@@ -152,7 +158,7 @@ export function GrowthSection({
             </h2>
             {subtitle && (
               <p
-                className={`mb-10 text-sm font-light italic leading-relaxed text-moss-ink/50 sm:text-base ${
+                className={`mb-10 text-sm font-light italic leading-relaxed text-moss-ink/55 sm:text-base ${
                   titleAlign === "right" ? "text-right" : ""
                 }`}
               >

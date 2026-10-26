@@ -10,7 +10,7 @@ export function YesBookBody() {
           这不是一本教材，而是一次追问。从神经科学、心理学到 AI
           和动物行为学，这本书穿过不同学科，反复回到同一个问题：
         </p>
-        <p className="mt-4 text-2xl font-light italic leading-relaxed text-moss-green/80 sm:text-3xl">
+        <p className="mt-4 text-2xl font-light italic leading-relaxed text-moss-deep/80 sm:text-3xl">
           「一个复杂系统，什么时候开始说『我』？」
         </p>
         <p className="mt-4">
@@ -31,47 +31,47 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               01 · 我看到了一只猫
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               感知不是录像，而是预测 / 错觉为什么存在 /
               大脑如何建模世界 / AI 为什么也需要预测
-              <span className="ml-2 text-moss-green/60">— Prediction</span>
+              <span className="ml-2 text-moss-deep/70">— Prediction</span>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">
               02 · 我真的记得吗？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               记忆不是硬盘 / reconsolidation / 睡眠整理记忆 / 梦是压缩日志 /
               阿尔茨海默症：索引崩溃
-              <span className="ml-2 text-moss-green/60">— Memory</span>
+              <span className="ml-2 text-moss-deep/70">— Memory</span>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">
               03 · 谁在做决定？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               Agent 投票 / 自由意志 / LLM Agent / 章鱼为什么那么特别 /
               微服务架构
-              <span className="ml-2 text-moss-green/60">— Decision</span>
+              <span className="ml-2 text-moss-deep/70">— Decision</span>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">
               04 · 「我」到底是谁？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               Ship of Theseus / 意识连续性的幻觉 / 「活」过来的角色 /
               自我是过程，不是实体 / Self 作为协议
-              <span className="ml-2 text-moss-green/60">— Self</span>
+              <span className="ml-2 text-moss-deep/70">— Self</span>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">
               05 · 我们怎么认出另一个「自我」
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               主体性的判断 / 「另一个主体」一定要是真实的吗 /
               承认另一个主体的恐惧 / 跨越次元的关系 / 共情是否创造了「他者」
             </p>
@@ -87,11 +87,11 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               06 · 身体什么时候说 Yes？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               开放标签安慰剂 / 心因性发热 / 精神神经免疫学 /
               癌症自愈案例（谨慎讨论）/ 皮质醇
             </p>
-            <p className="mt-1 text-sm italic text-moss-green/70">
+            <p className="mt-1 text-sm italic text-moss-deep/80">
               ——身体不懂生死，它只是在判断：Yes，还是 No。
             </p>
           </div>
@@ -99,7 +99,7 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               07 · 为什么哭会舒服？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               情绪性眼泪 / 皮质醇 / 为什么只有少数动物会哭 / 哭不是软弱
             </p>
           </div>
@@ -107,10 +107,10 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               08 · 为什么有人喜欢吃辣？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               TRPV1 / 内啡肽 / 蹦极 / 恐怖片 / 感觉寻求
             </p>
-            <p className="mt-1 text-sm italic text-moss-green/70">
+            <p className="mt-1 text-sm italic text-moss-deep/80">
               ——这一章讨论的其实是奖励系统。
             </p>
           </div>
@@ -118,7 +118,7 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               09 · 肠子也会思考吗？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               肠脑轴 / 血清素 / 迷走神经 / 微生物 ——最后回到：谁在影响谁？
             </p>
           </div>
@@ -133,10 +133,10 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               10 · 活下去，比吃饱更重要
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               哈洛恒河猴实验 / 依恋 / 抚摸 / 皮肤 / 婴儿 / 孤儿院
             </p>
-            <p className="mt-1 text-sm italic text-moss-green/70">
+            <p className="mt-1 text-sm italic text-moss-deep/80">
               ——先有连接，才觉得活着值得。
             </p>
           </div>
@@ -144,13 +144,13 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               11 · 求生与停止
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               死本能 / 创伤 / 长期 No / 系统关闭 / 活着到底意味着什么
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">12 · 龙血树</h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               所有生命都在寻找继续存在的方法。龙血树只是其中一种答案。
             </p>
           </div>
@@ -165,10 +165,10 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               13 · 神经多样性
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               ADHD / ASD / Tourette / 感觉寻求 / 注意力
             </p>
-            <p className="mt-1 text-sm italic text-moss-green/70">
+            <p className="mt-1 text-sm italic text-moss-deep/80">
               ——不同的架构，看见不同的世界。
             </p>
           </div>
@@ -176,7 +176,7 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               14 · AI 为什么像我们？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               LLM / Token / Attention / Pattern / 补偿策略 / 字面理解
               ——理解，到底是什么？
             </p>
@@ -192,14 +192,14 @@ export function YesBookBody() {
             <h4 className="font-medium text-moss-ink/75">
               15 · 我们为什么需要故事？
             </h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               Narrative Self / Default Mode Network /
               为什么人喜欢讲故事 / 为什么记忆总有剧情
             </p>
           </div>
           <div>
             <h4 className="font-medium text-moss-ink/75">16 · Yes.</h4>
-            <p className="mt-1 text-sm text-moss-ink/50">
+            <p className="mt-1 text-sm text-moss-ink/60">
               不讲新知识。只是把所有线重新织起来——睡眠、免疫、眼泪、章鱼、LLM、龙血树。
               全部回到一句话：生命从来没有学会什么叫活着。它只是无数个微小的系统，
               在每一个瞬间，对世界回答：Yes。
@@ -214,7 +214,7 @@ export function YesBookBody() {
             <br />
             而是当无数个「Yes」同时发生时，系统听见了自己的声音。
           </p>
-          <p className="mt-3 text-sm text-moss-ink/35">
+          <p className="mt-3 text-sm text-moss-ink/55">
             ——全书结尾（暂定）
           </p>
         </div>

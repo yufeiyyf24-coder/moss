@@ -65,7 +65,6 @@ const TITLE_AT = HEARTBEAT_AT + 0.50 + 0.15;
 const SEQUENCE_END = TITLE_AT + 1.22;
 
 const NIGHT = "#152135";
-const MINT = "#e5f4f1";
 const STAR_CORE = "radial-gradient(circle at 35% 35%, #f2fdfa, #35c9b8 55%, #15b7a8 100%)";
 
 /* ------------------------------------------------------------------ */
@@ -124,39 +123,35 @@ function AnimatedTopBar({
 }
 
 function StaticTopBar({ domain }: { domain: Domain }) {
-  const textClass = domainTextClass[domain.id];
-  const { scrollY } = useScroll();
-  const maskOpacity = useTransform(scrollY, [0, 80], [0, 1]);
-
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 isolate flex items-center justify-between px-6 py-5 sm:px-10">
-      <motion.div
+    <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-10 lg:py-5">
+      <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 sm:h-32"
-        style={{
-          opacity: maskOpacity,
-          background: "linear-gradient(to bottom, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.70) 42%, rgba(255,255,255,0.38) 65%, rgba(255,255,255,0) 100%)",
-        }}
+        className="pointer-events-none absolute inset-x-0 top-0 hidden h-28 bg-gradient-to-b from-white via-white/85 to-transparent lg:block"
       />
-      <Link
-        href={`/${domain.id}`}
-        className="text-sm font-light tracking-wide text-moss-ink/50 transition-colors duration-500 hover:text-moss-ink"
-      >
-        ← 回到 {domain.label}
-      </Link>
-      <span className="flex items-center gap-5">
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-light ${domainBgClass[domain.id]}/10 ${textClass}`}
-        >
-          {domain.sub}
-        </span>
+      <div className="relative flex items-center justify-between gap-3">
         <Link
-          href="/"
-          className="text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+          href={`/${domain.id}`}
+          className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
         >
-          Project Moss
+          <span className="sm:hidden">← {domain.label}</span>
+          <span className="hidden sm:inline">← 回到 {domain.label}</span>
         </Link>
-      </span>
+        <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+          <span
+            className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
+          >
+            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${domainBgClass[domain.id]}`} />
+            {domain.sub}
+          </span>
+          <Link
+            href="/"
+            className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+          >
+            Project Moss
+          </Link>
+        </span>
+      </div>
     </header>
   );
 }
@@ -287,7 +282,7 @@ function FloatingSentence({
       p1: ((h >> 15) % 628) / 100,
       p2: ((h >> 17) % 628) / 100,
     };
-  }, [sentence]);
+  }, [sentence, text]);
 
   // 漂移：rAF 直接写 inner transform，不触发 React 重渲染
   useEffect(() => {
@@ -621,6 +616,7 @@ function ScrollHero({ project, domain }: { project: Project; domain: Domain }) {
   const { scrollY: windowScroll } = useScroll();
 
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- 客户端测量窗口尺寸前必须先挂载
   useEffect(() => setMounted(true), []);
 
   const elapsed = useMotionValue(-1);
@@ -879,6 +875,7 @@ export function ShouhuxingHero({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- matchMedia 只能在挂载后读取
     setIsMobile(window.matchMedia("(max-width: 768px)").matches);
   }, []);
 

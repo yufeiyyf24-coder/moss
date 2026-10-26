@@ -66,7 +66,7 @@ export function CptsdBody() {
         </div>
 
         <h3 className="mb-2 mt-6 text-base font-medium text-moss-ink/85">用户旅程</h3>
-        <p className="font-mono text-sm leading-relaxed text-moss-ink/50">
+        <p className="font-mono text-sm leading-relaxed text-moss-ink/60">
           发现问题 → 隐私顾虑 → 匿名探索 → 技能学习 → 专业求助
         </p>
 
@@ -99,7 +99,7 @@ export function CptsdBody() {
                 style={{ width: "92%" }}
               />
             </div>
-            <p className="mt-1 text-xs text-moss-ink/35">
+            <p className="mt-1 text-xs text-moss-ink/55">
               基于 CBT 的比例 50.7%
             </p>
           </div>
@@ -135,8 +135,8 @@ export function CptsdBody() {
           {/* CPTSD */}
           <div>
             <div className="mb-1 flex justify-between text-sm">
-              <span className="font-medium text-moss-green/80">CPTSD 专用产品</span>
-              <span className="font-bold text-moss-green">0</span>
+              <span className="font-medium text-moss-deep/90">CPTSD 专用产品</span>
+              <span className="font-bold text-moss-deep">0</span>
             </div>
             <div className="h-4 w-full overflow-hidden rounded-full bg-moss-warm/50">
               <div
@@ -182,14 +182,14 @@ export function CptsdBody() {
                 <td className="py-3 pr-3">无针对性设计</td>
               </tr>
               <tr>
-                <td className="py-3 pr-3 font-medium text-moss-green">
+                <td className="py-3 pr-3 font-medium text-moss-deep">
                   安途（本项目）
                 </td>
-                <td className="py-3 pr-3 text-moss-green/80">
+                <td className="py-3 pr-3 text-moss-deep/90">
                   硬件 + App 双场景
                 </td>
                 <td className="py-3 pr-3">
-                  <span className="rounded-full bg-moss-green/15 px-2 py-0.5 text-xs text-moss-green">
+                  <span className="rounded-full bg-moss-green/15 px-2 py-0.5 text-xs text-moss-deep">
                     专为 CPTSD 设计
                   </span>
                 </td>
@@ -204,20 +204,20 @@ export function CptsdBody() {
         </h3>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-2xl font-light text-moss-green">22%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">已使用</p>
+            <p className="text-2xl font-light text-moss-deep">22%</p>
+            <p className="mt-1 text-xs text-moss-ink/60">已使用</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-2xl font-light text-moss-green">47%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">有兴趣使用</p>
+            <p className="text-2xl font-light text-moss-deep">47%</p>
+            <p className="mt-1 text-xs text-moss-ink/60">有兴趣使用</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-2xl font-light text-moss-green">60%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">疫情期开始</p>
+            <p className="text-2xl font-light text-moss-deep">60%</p>
+            <p className="mt-1 text-xs text-moss-ink/60">疫情期开始</p>
           </div>
           <div className="rounded-lg bg-moss-warm/30 p-4 text-center">
-            <p className="text-2xl font-light text-moss-green">90%</p>
-            <p className="mt-1 text-xs text-moss-ink/50">关注隐私</p>
+            <p className="text-2xl font-light text-moss-deep">90%</p>
+            <p className="mt-1 text-xs text-moss-ink/60">关注隐私</p>
           </div>
         </div>
       </GrowthSection>

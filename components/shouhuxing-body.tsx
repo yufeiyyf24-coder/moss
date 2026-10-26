@@ -204,11 +204,11 @@ function ComparisonCard({ comparison, index }: {
           aria-hidden={flipped}
           className={`col-start-1 row-start-1 flex min-h-[250px] flex-col rounded-xl border border-shx-teal/20 bg-[#fffdf7] p-6 shadow-[0_4px_14px_rgba(62,105,94,0.07)] transition-shadow duration-300 group-hover:shadow-[0_12px_24px_rgba(62,105,94,0.14)] [backface-visibility:hidden] ${flipped ? "motion-reduce:opacity-0" : "motion-reduce:opacity-100"}`}
         >
-          <span className="flex items-center justify-between text-xs font-light text-moss-ink/40">
+          <span className="flex items-center justify-between text-xs font-light text-moss-ink/55">
             <span>常规做法</span><span>{String(index + 1).padStart(2, "0")}</span>
           </span>
           <span className="mt-6 font-wenkai text-xl text-moss-ink/75">{comparison.scene}</span>
-          <span className="mt-3 text-sm font-light leading-7 text-moss-ink/50">{comparison.old}</span>
+          <span className="mt-3 text-sm font-light leading-7 text-moss-ink/60">{comparison.old}</span>
           <span className="mt-auto flex items-center justify-between pt-7 text-xs font-light text-[#568d86]">
             <span>翻面，看看另一种可能</span><span aria-hidden="true" className="text-lg transition-transform group-hover:rotate-45 motion-reduce:transform-none">↻</span>
           </span>
@@ -243,6 +243,7 @@ type DemoWindow = Window & {
 
 function DemoShowcase() {
   const [active, setActive] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lastActionRef = useRef<{ page?: string; modal?: boolean } | null>(null);
@@ -264,6 +265,16 @@ function DemoShowcase() {
   };
 
   useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  /* 桌面端保留滚动联动；手机端改用步骤按钮，避免手机滚出屏幕后失去参考 */
+  useEffect(() => {
+    if (!isDesktop) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -278,37 +289,20 @@ function DemoShowcase() {
     );
     stepRefs.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isDesktop]);
+
+  const selectStep = (idx: number) => {
+    setActive(idx);
+    driveDemo(demoSteps[idx].action);
+  };
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[minmax(0,300px)_1fr] lg:gap-16">
-      {/* 左侧：sticky 手机 */}
-      <div className="flex justify-center lg:sticky lg:top-24 lg:self-start">
-        <div>
-          <div className="relative h-[650px] w-[300px] overflow-hidden rounded-[2.5rem] shadow-[0_25px_60px_rgba(21,183,168,0.2)] ring-1 ring-shx-teal/25">
-            <iframe
-              ref={iframeRef}
-              src="/shouhuxing-demo.html"
-              title="守护星可交互原型"
-              onLoad={() => driveDemo(demoSteps[0].action)}
-              style={{
-                width: 375,
-                height: 812,
-                transform: "scale(0.8)",
-                transformOrigin: "top left",
-              }}
-              className="block border-0 bg-[#E5F4F1]"
-            />
-          </div>
-          <p className="mt-4 text-center text-xs font-light text-moss-ink/40">
-            可交互原型 · 可以直接点击屏幕
-          </p>
-        </div>
-      </div>
-
-      {/* 右侧：四条说明，滚动到中间时高亮并联动手机 */}
-      <div className="space-y-14">
+    <div className="lg:grid lg:grid-cols-[minmax(0,300px)_1fr] lg:gap-16">
+      {/* 第一部分：四步介绍（手机在上，桌面在右） */}
+      <div className="space-y-10 lg:order-2 lg:space-y-14">
+        <p className="text-xs font-light italic leading-6 text-moss-ink/60 lg:hidden">
+          先读这四步，再在下面的原型里点一点。
+        </p>
         {demoSteps.map((step, idx) => {
           const isActive = active === idx;
           return (
@@ -319,15 +313,15 @@ function DemoShowcase() {
                 stepRefs.current[idx] = el;
               }}
               className={`transition-all duration-500 ${
-                isActive ? "opacity-100" : "opacity-50 hover:opacity-80"
+                isActive ? "opacity-100" : "opacity-100 lg:opacity-50 lg:hover:opacity-80"
               }`}
             >
               <div
                 className={`border-l-2 pl-5 transition-colors duration-500 ${
-                  isActive ? "border-shx-teal/60" : "border-shx-teal/20"
+                  isActive ? "border-shx-teal/60" : "border-shx-teal/25 lg:border-shx-teal/20"
                 }`}
               >
-                <span className="mb-2 block font-wenkai text-2xl font-thin text-shx-teal/50">
+                <span className="mb-2 block font-wenkai text-2xl font-thin text-shx-teal/60">
                   0{idx + 1}
                 </span>
                 <h4 className="mb-3 font-wenkai text-xl font-light text-moss-ink">
@@ -336,13 +330,63 @@ function DemoShowcase() {
                 <p className="text-sm font-light leading-7 text-moss-ink/70 sm:text-base sm:leading-8">
                   {step.desc}
                 </p>
-                <p className="mt-3 text-xs font-light italic text-moss-ink/40">
+                <p className="mt-3 text-xs font-light italic text-moss-ink/60">
                   → {step.hint}
                 </p>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* 第二部分：原型试用（手机在下，桌面在左） */}
+      <div className="mt-12 lg:order-1 lg:mt-0 lg:sticky lg:top-24 lg:self-start">
+        <p className="mb-4 text-xs font-light tracking-wide text-moss-ink/60 lg:hidden">
+          可交互原型 · 选一步试试
+        </p>
+
+        <div className="flex justify-center">
+          <div>
+            <div className="relative h-[650px] w-[300px] overflow-hidden rounded-[2.5rem] shadow-[0_25px_60px_rgba(21,183,168,0.2)] ring-1 ring-shx-teal/25 max-[360px]:h-[600px] max-[360px]:w-[277px]">
+              <iframe
+                ref={iframeRef}
+                src="/shouhuxing-demo.html"
+                title="守护星可交互原型"
+                onLoad={() => driveDemo(demoSteps[0].action)}
+                style={{
+                  width: 375,
+                  height: 812,
+                }}
+                className="block border-0 bg-[#E5F4F1] [transform:scale(0.8)] [transform-origin:top_left] max-[360px]:[transform:scale(0.738)]"
+              />
+            </div>
+            <p className="mt-4 text-center text-xs font-light text-moss-ink/60">
+              可以直接点击屏幕操作
+            </p>
+          </div>
+        </div>
+
+        {/* 手机端：用按钮切换演示步骤 */}
+        <div className="mt-6 grid grid-cols-2 gap-2 lg:hidden">
+          {demoSteps.map((step, idx) => (
+            <button
+              key={step.title}
+              type="button"
+              onClick={() => selectStep(idx)}
+              aria-pressed={active === idx}
+              className={`flex min-h-12 items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs transition-colors duration-300 ${
+                active === idx
+                  ? "border-shx-teal/50 bg-white text-moss-ink shadow-[0_4px_14px_-10px_rgba(21,183,168,0.5)]"
+                  : "border-shx-teal/15 bg-white/45 text-moss-ink/60"
+              }`}
+            >
+              <span className="shrink-0 font-wenkai text-sm text-shx-teal/70">
+                0{idx + 1}
+              </span>
+              <span className="min-w-0 leading-5">{step.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -368,7 +412,7 @@ function EasterEggStar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.4 }}
-            className="absolute -bottom-2 whitespace-nowrap text-xs font-light italic text-moss-ink/50"
+            className="absolute -bottom-2 whitespace-nowrap text-xs font-light italic text-moss-ink/60"
           >
             I was here when you needed me.
           </motion.span>
@@ -404,7 +448,7 @@ export function ShouhuxingBody() {
             <p className="mt-6 max-w-md text-sm font-light leading-7 text-moss-ink/55">
               医疗系统聚焦于患者本身，家属作为实际照护者，长期处于无人支持的真空地带。
             </p>
-            <p className="mt-8 max-w-md text-xs font-light leading-6 text-moss-ink/45">
+            <p className="mt-8 max-w-md text-xs font-light leading-6 text-moss-ink/55">
               研究方法：专家访谈 · 代理访谈 · 桌面研究。
               <br />
               局限：本项目未进行大规模问卷调研，研究深度依赖临床专家中转获取的家属反馈。
@@ -413,8 +457,8 @@ export function ShouhuxingBody() {
 
           {/* 三种帮助停在不同的缺口：开放排版，短线在疑问前断开。 */}
           <div>
-            <h3 className="flex items-center justify-end gap-4 text-right font-wenkai text-xl font-normal tracking-wide text-moss-ink/85 sm:text-2xl">
-              <span aria-hidden="true" className="h-px w-20 shrink-0 bg-shx-teal/40 sm:w-32" />
+            <h3 className="flex items-center justify-start gap-4 font-wenkai text-xl font-normal tracking-wide text-moss-ink/85 sm:justify-end sm:text-right sm:text-2xl">
+              <span aria-hidden="true" className="hidden h-px w-20 shrink-0 bg-shx-teal/40 sm:block sm:w-32" />
               <span>现有工具的困境</span>
             </h3>
             <ul className="mt-6 space-y-7 lg:mt-4 lg:space-y-5">
@@ -589,15 +633,15 @@ export function ShouhuxingBody() {
               </span>
             </div>
             <div className="rounded-lg bg-shx-card/50 p-5">
-              <span className="block text-sm font-medium text-moss-ink/50">记录</span>
+              <span className="block text-sm font-medium text-moss-ink/60">记录</span>
               <span className="text-moss-ink/80">每日打卡 + 数据趋势</span>
             </div>
             <div className="rounded-lg bg-shx-card/50 p-5">
-              <span className="block text-sm font-medium text-moss-ink/50">学一学</span>
+              <span className="block text-sm font-medium text-moss-ink/60">学一学</span>
               <span className="text-moss-ink/80">知识库 + 情景应对</span>
             </div>
             <div className="rounded-lg bg-shx-card/50 p-5">
-              <span className="block text-sm font-medium text-moss-ink/50">我的</span>
+              <span className="block text-sm font-medium text-moss-ink/60">我的</span>
               <span className="text-moss-ink/80">家庭协作 + 设置</span>
             </div>
           </div>
@@ -608,7 +652,7 @@ export function ShouhuxingBody() {
 
       <GrowthSection
         title="第四章 · 叶子"
-        subtitle="方案展示。每一个功能都是一片叶子，看完前面的根系，自然就懂了。右侧滚动时，左侧的手机会跟着动。"
+        subtitle="方案展示。每一个功能都是一片叶子，看完前面的根系，自然就懂了。"
         layout="wide"
       >
         <DemoShowcase />
@@ -633,20 +677,20 @@ export function ShouhuxingBody() {
                   {s.value}
                 </p>
                 <p className="mt-1 text-sm tracking-wide text-moss-ink/60">{s.label}</p>
-                <p className="mt-1 text-xs font-light text-moss-ink/40">{s.note}</p>
+                <p className="mt-1 text-xs font-light text-moss-ink/55">{s.note}</p>
               </div>
             ))}
           </div>
 
           <div className="mb-8 grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-shx-teal/15 bg-shx-card/60 p-5 sm:p-6">
-              <p className="mb-3 text-sm tracking-wide text-moss-ink/50">
+              <p className="mb-3 text-sm tracking-wide text-moss-ink/60">
                 SUS 得分分布
               </p>
               <SusCurveChart />
             </div>
             <div className="rounded-xl border border-shx-teal/15 bg-shx-card/60 p-5 sm:p-6">
-              <p className="mb-3 text-sm tracking-wide text-moss-ink/50">
+              <p className="mb-3 text-sm tracking-wide text-moss-ink/60">
                 任务完成时长
               </p>
               <TaskCurveChart />
@@ -654,13 +698,13 @@ export function ShouhuxingBody() {
           </div>
 
           <div className="mb-8 rounded-xl border border-shx-teal/15 bg-shx-card/60 p-5 sm:p-8">
-            <p className="mb-3 text-sm tracking-wide text-moss-ink/50">
+            <p className="mb-3 text-sm tracking-wide text-moss-ink/60">
               访谈关键词
             </p>
             <WordCloud />
           </div>
 
-          <p className="mb-4 text-sm tracking-wide text-moss-ink/50">主要发现</p>
+          <p className="mb-4 text-sm tracking-wide text-moss-ink/60">主要发现</p>
           <div className="mb-8 space-y-3">
             {testFindings.map((f, idx) => (
               <div
@@ -677,7 +721,7 @@ export function ShouhuxingBody() {
             ))}
           </div>
 
-          <p className="mb-4 text-sm tracking-wide text-moss-ink/50">
+          <p className="mb-4 text-sm tracking-wide text-moss-ink/60">
             测试反馈 → 下一阶段优化方向
           </p>
           <div className="space-y-3">
@@ -686,7 +730,7 @@ export function ShouhuxingBody() {
                 key={idx}
                 className="rounded-xl border border-shx-teal/15 bg-shx-card/50 p-5"
               >
-                <p className="text-xs font-light italic text-moss-ink/45">
+                <p className="text-xs font-light italic text-moss-ink/55">
                   {item.feedback}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-moss-ink/75">
@@ -695,7 +739,7 @@ export function ShouhuxingBody() {
               </div>
             ))}
           </div>
-          <p className="mt-4 text-xs font-light italic text-moss-ink/35">
+          <p className="mt-4 text-xs font-light italic text-moss-ink/55">
             * 以上为基于测试反馈提出的优化方向，尚在迭代中，未全部落地。
           </p>
         </div>
@@ -728,7 +772,7 @@ export function ShouhuxingBody() {
         subtitle="有些东西不需要被所有人看到，但被发现的人会记住。"
       >
         <blockquote className="mb-10 border-l-2 border-shx-teal/40 pl-5 text-lg font-light italic text-moss-ink/70">
-          "The best AI is the one you can eventually live without."
+          “The best AI is the one you can eventually live without.”
           <br />
           最好的 AI，是最终让你不再需要它的 AI。
         </blockquote>
@@ -737,7 +781,7 @@ export function ShouhuxingBody() {
           所有长程慢性疾病最终都会让家属「久病成医」。AI 起不到作用，正是它起到作用的表现——它能带着一个毫无知识储备的人慢慢了解这个疾病、学会与之共存，直到他们可以独立面对问题。这是工具最温柔的意义。
         </p>
 
-        <p className="mb-8 text-center text-sm text-moss-ink/40">
+        <p className="mb-8 text-center text-sm text-moss-ink/55">
           在照护过程中，有一颗星星帮你标记方向。
         </p>
 
