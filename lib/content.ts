@@ -99,6 +99,15 @@ export const projects: Project[] = [
     status: "growing",
   },
   {
+    slug: "cike",
+    title: "此刻",
+    subtitle: "挑几个词，留住当下的感受",
+    summary:
+      "从精神科门诊里一句「最近怎么样」开始：用六类口语化标签和 1–5 的行为锚点，把说不清的感受留成一份能带进诊室的记录。独立完成的 UI/UX 项目，无账号、无服务器、无网络权限。",
+    domains: ["mind"],
+    status: "growing",
+  },
+  {
     slug: "moor",
     title: "ADHD 专注辅助副屏",
     subtitle: "鱼骨图实时脉络 · 课堂注意力定锚设备",
@@ -142,6 +151,15 @@ export const projects: Project[] = [
       "接管一个已经存在但没人认真做过的事：让游客手中的竹杖拥有「下一生」——归还、再造、成为种子纸卡片。",
     domains: ["sustainability"],
     status: "seed",
+  },
+  {
+    slug: "juanjuan",
+    title: "卷卷",
+    subtitle: "实体挂件 + App 陪伴产品 · 美术 / 视觉 / UI",
+    summary:
+      "实习期间参与的「实体挂件 + App」陪伴产品。卷卷会像旅行青蛙一样出门旅行，寄回明信片和小礼物；我负责 IP 设计与插画、界面视觉和 UI。这里放了 IP 设计、UI 前端交付图与动效。",
+    domains: ["visual"],
+    status: "growing",
   },
   {
     slug: "visual-notes",

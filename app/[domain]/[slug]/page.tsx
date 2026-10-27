@@ -13,10 +13,12 @@ import { ShouhuxingHero } from "@/components/shouhuxing-hero";
 import { XiaojiBody } from "@/components/xiaoji-body";
 import { CptsdBody } from "@/components/cptsd-body";
 import { AsthmaBody } from "@/components/asthma-body";
+import { CikeBody } from "@/components/cike-body";
 import { MoorBody } from "@/components/moor-body";
 import { LinhangBody } from "@/components/linhang-body";
 import { NextLifeBody } from "@/components/next-life-body";
 import { VisualNotesBody } from "@/components/visual-notes-body";
+import { JuanjuanBody } from "@/components/juanjuan-body";
 import { YesBookBody } from "@/components/yes-book-body";
 import { FragmentsBody } from "@/components/fragments-body";
 import { AiThoughtsBody } from "@/components/ai-thoughts-body";
@@ -63,12 +65,16 @@ function ProjectBody({ slug }: { slug: string }) {
       return <CptsdBody />;
     case "asthma":
       return <AsthmaBody />;
+    case "cike":
+      return <CikeBody />;
     case "moor":
       return <MoorBody />;
     case "linhang":
       return <LinhangBody />;
     case "next-life":
       return <NextLifeBody />;
+    case "juanjuan":
+      return <JuanjuanBody />;
     case "visual-notes":
       return <VisualNotesBody />;
     case "yes-book":
