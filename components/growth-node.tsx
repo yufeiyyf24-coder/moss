@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Project, Domain, domainBgClass } from "@/lib/content";
-import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 
 export function GrowthNode({
   project,
@@ -31,33 +30,31 @@ export function GrowthNode({
   return (
     <article className="relative z-10 min-h-screen">
       {/* top navigation bar */}
-      <MobileScrollFade>
-        <div className="fixed inset-x-0 top-0 z-40 px-5 py-4 sm:px-10 lg:py-5">
-          <div className="relative flex items-center justify-between gap-3">
-            <Link
-              href={`/${domain.id}`}
-              className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+      <div className="fixed inset-x-0 top-0 z-40 px-5 py-4 sm:px-10 lg:py-5">
+        <div className="relative flex items-center justify-between gap-3">
+          <Link
+            href={`/${domain.id}`}
+            className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+          >
+            <span className="sm:hidden">← {domain.label}</span>
+            <span className="hidden sm:inline">← 回到 {domain.label}</span>
+          </Link>
+          <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+            <span
+              className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
             >
-              <span className="sm:hidden">← {domain.label}</span>
-              <span className="hidden sm:inline">← 回到 {domain.label}</span>
-            </Link>
-            <span className="flex shrink-0 items-center gap-3 transition-opacity duration-300 max-lg:opacity-[var(--header-fade)] sm:gap-5">
-              <span
-                className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
-              >
-                <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
-                {domain.sub}
-              </span>
-              <Link
-                href="/"
-                className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
-              >
-                Project Moss
-              </Link>
+              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
+              {domain.sub}
             </span>
-          </div>
+            <Link
+              href="/"
+              className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+            >
+              Project Moss
+            </Link>
+          </span>
         </div>
-      </MobileScrollFade>
+      </div>
 
       {/* hero */}
       <section className="relative px-6 pb-12 pt-36 sm:px-10 sm:pt-44 lg:px-20">

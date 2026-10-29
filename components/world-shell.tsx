@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { LakeLayer } from "@/components/lake-layer";
-import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 import { WindLayer } from "@/components/wind-layer";
 import { RippleSurface } from "@/components/ripple-surface";
 import { WaterTrail } from "@/components/water-trail";
@@ -39,26 +38,24 @@ export function WorldShell({
       )}
 
       {!hideHeader && (
-        <MobileScrollFade>
-          <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 sm:px-10 lg:py-5">
-            <div className="relative flex items-center justify-between gap-4">
-              {backHref && (
-                <Link
-                  href={backHref}
-                  className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
-                >
-                  {backLabel ?? "← 返回"}
-                </Link>
-              )}
+        <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 sm:px-10 lg:py-5">
+          <div className="relative flex items-center justify-between gap-4">
+            {backHref && (
               <Link
-                href="/"
-                className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-[color,opacity] duration-500 hover:text-moss-ink max-lg:duration-300 max-lg:opacity-[var(--header-fade)] sm:text-xl"
+                href={backHref}
+                className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
               >
-                Project Moss
+                {backLabel ?? "← 返回"}
               </Link>
-            </div>
-          </header>
-        </MobileScrollFade>
+            )}
+            <Link
+              href="/"
+              className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+            >
+              Project Moss
+            </Link>
+          </div>
+        </header>
       )}
 
       {children}

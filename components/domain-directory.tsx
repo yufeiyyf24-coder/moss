@@ -121,7 +121,7 @@ export function DomainDirectory({ domain }: { domain: Domain }) {
         />
       </div>
 
-      <main className="relative z-10 flex min-h-screen flex-col sm:flex-row">
+      <main className="scroll-fade-under-header relative z-10 flex min-h-screen flex-col sm:flex-row">
         {/* Left half — domain identity */}
         <section className="flex min-h-[35vh] flex-col justify-center px-8 pt-28 sm:fixed sm:bottom-0 sm:left-0 sm:top-0 sm:w-[40%] sm:min-h-screen sm:pt-0 lg:px-16">
           <div className="sm:max-w-sm lg:max-w-md">

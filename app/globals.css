@@ -126,6 +126,14 @@ body {
   font-family: var(--font-wenkai);
 }
 
+/* 手机端：页面内容滑到固定顶栏下方时渐隐，避免与返回键叠字 */
+@media (max-width: 1023.98px) {
+  .scroll-fade-under-header {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 104px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 104px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe,
   .animate-breathe-slow,

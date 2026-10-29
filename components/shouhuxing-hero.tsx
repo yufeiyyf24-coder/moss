@@ -19,7 +19,6 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 import { hashString } from "@/components/spread-layout";
-import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 import { Project, Domain, domainTextClass, domainBgClass } from "@/lib/content";
 
 /* easeInOutCubic（规格：越靠近中心越慢，像万有引力） */
@@ -125,33 +124,31 @@ function AnimatedTopBar({
 
 function StaticTopBar({ domain }: { domain: Domain }) {
   return (
-    <MobileScrollFade>
-      <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 sm:px-10 lg:py-5">
-        <div className="relative flex items-center justify-between gap-3">
-          <Link
-            href={`/${domain.id}`}
-            className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+    <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 sm:px-10 lg:py-5">
+      <div className="relative flex items-center justify-between gap-3">
+        <Link
+          href={`/${domain.id}`}
+          className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+        >
+          <span className="sm:hidden">← {domain.label}</span>
+          <span className="hidden sm:inline">← 回到 {domain.label}</span>
+        </Link>
+        <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+          <span
+            className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
           >
-            <span className="sm:hidden">← {domain.label}</span>
-            <span className="hidden sm:inline">← 回到 {domain.label}</span>
-          </Link>
-          <span className="flex shrink-0 items-center gap-3 transition-opacity duration-300 max-lg:opacity-[var(--header-fade)] sm:gap-5">
-            <span
-              className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
-            >
-              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${domainBgClass[domain.id]}`} />
-              {domain.sub}
-            </span>
-            <Link
-              href="/"
-              className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
-            >
-              Project Moss
-            </Link>
+            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${domainBgClass[domain.id]}`} />
+            {domain.sub}
           </span>
-        </div>
-      </header>
-    </MobileScrollFade>
+          <Link
+            href="/"
+            className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+          >
+            Project Moss
+          </Link>
+        </span>
+      </div>
+    </header>
   );
 }
 
