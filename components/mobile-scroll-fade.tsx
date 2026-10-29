@@ -1,44 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
- * 手机端（<lg）顶栏随滚动淡出：手指上滑阅读时降低不透明度，
- * 往回拉或停止滚动后恢复。桌面端与平板以上不受影响，也不加白色底。
+ * 手机端（<lg）顶栏随滚动淡出：离开页面顶端后保持半透明，回到顶端恢复。
+ * 桌面端不受影响。
+ * 透明度通过 CSS 变量 --header-fade 提供给子元素——返回键这类独立元素
+ * 不引用该变量，就能和顶栏分开层级、始终清晰。
  */
 export function MobileScrollFade({ children }: { children: React.ReactNode }) {
-  const [dimmed, setDimmed] = useState(false);
-  const restTimer = useRef<number | undefined>(undefined);
+  const [away, setAway] = useState(false);
 
   useEffect(() => {
-    let lastY = window.scrollY;
-
     const onScroll = () => {
       if (window.innerWidth >= 1024) return;
-      const y = window.scrollY;
-      const dy = y - lastY;
-      lastY = y;
-
-      if (dy > 3) setDimmed(true);
-      else if (dy < -3) setDimmed(false);
-
-      window.clearTimeout(restTimer.current);
-      restTimer.current = window.setTimeout(() => setDimmed(false), 600);
+      setAway(window.scrollY > 8);
     };
-
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(restTimer.current);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <div
-      className={`max-lg:transition-opacity max-lg:duration-300 ${
-        dimmed ? "max-lg:opacity-30" : "max-lg:opacity-100"
-      }`}
-    >
+    <div style={{ "--header-fade": away ? "0.45" : "1" } as React.CSSProperties}>
       {children}
     </div>
   );

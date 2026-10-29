@@ -135,7 +135,7 @@ function StaticTopBar({ domain }: { domain: Domain }) {
             <span className="sm:hidden">← {domain.label}</span>
             <span className="hidden sm:inline">← 回到 {domain.label}</span>
           </Link>
-          <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+          <span className="flex shrink-0 items-center gap-3 transition-opacity duration-300 max-lg:opacity-[var(--header-fade)] sm:gap-5">
             <span
               className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
             >

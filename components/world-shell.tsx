@@ -52,7 +52,7 @@ export function WorldShell({
               )}
               <Link
                 href="/"
-                className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+                className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-[color,opacity] duration-500 hover:text-moss-ink max-lg:duration-300 max-lg:opacity-[var(--header-fade)] sm:text-xl"
               >
                 Project Moss
               </Link>
