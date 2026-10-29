@@ -33,16 +33,19 @@ export function MobileContentFade({ children }: { children: React.ReactNode }) {
         clear();
         return;
       }
+      // 元素顶部在文档中的位置——正文从 Hero 之后开始时，遮罩带需要相应偏移
+      const elTop = el.getBoundingClientRect().top + window.scrollY;
+      const offset = window.scrollY - elTop;
       const gradient =
-        "linear-gradient(to bottom, transparent 0, #000 104px)";
+        "linear-gradient(to bottom, rgba(0,0,0,0.4) 0, #000 104px)";
       el.style.webkitMaskImage = gradient;
       el.style.maskImage = gradient;
       el.style.webkitMaskSize = "100% 100vh";
       el.style.maskSize = "100% 100vh";
       el.style.webkitMaskRepeat = "repeat-y";
       el.style.maskRepeat = "repeat-y";
-      el.style.webkitMaskPosition = `0 ${window.scrollY}px`;
-      el.style.maskPosition = `0 ${window.scrollY}px`;
+      el.style.webkitMaskPosition = `0 ${offset}px`;
+      el.style.maskPosition = `0 ${offset}px`;
     };
 
     const schedule = () => {

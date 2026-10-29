@@ -23,7 +23,7 @@ export function GrowthNode({
     return (
       <article className="relative z-10 min-h-screen">
         {hero}
-        {children}
+        <MobileContentFade>{children}</MobileContentFade>
       </article>
     );
   }
