@@ -652,6 +652,30 @@ export function CikeBody() {
         </blockquote>
       </GrowthSection>
 
+      <GrowthDivider />
+
+      {/* 可交互原型 */}
+      <GrowthSection
+        title="试用"
+        subtitle="挑几个词，留住现在。可以直接在下面的屏幕里操作。"
+      >
+        <div className="flex justify-center">
+          <div>
+            <div className="relative h-[650px] w-[300px] overflow-hidden rounded-[2.5rem] shadow-[0_25px_60px_rgba(125,155,106,0.2)] ring-1 ring-moss-green/25">
+              <iframe
+                src="/cike-demo/index.html"
+                title="此刻可交互原型"
+                style={{ width: 375, height: 812 }}
+                className="block border-0 bg-[#f3f5ef] [transform:scale(0.8)] [transform-origin:top_left]"
+              />
+            </div>
+            <p className="mt-4 text-center text-xs font-light text-moss-ink/60">
+              记录只保存在你自己的浏览器里
+            </p>
+          </div>
+        </div>
+      </GrowthSection>
+
       <div className="pb-24" />
     </>
   );

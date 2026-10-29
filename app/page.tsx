@@ -5,6 +5,7 @@ import { RippleSurface } from "@/components/ripple-surface";
 import { WaterTrail } from "@/components/water-trail";
 import { IntroField } from "@/components/intro-field";
 import { DomainField } from "@/components/domain-field";
+import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 
 export default function Home() {
   return (
@@ -15,14 +16,16 @@ export default function Home() {
       <RippleSurface />
 
       {/* Top-left logo */}
-      <header className="fixed inset-x-0 top-0 z-50 px-6 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-8 lg:left-10 lg:right-auto lg:top-8 lg:bg-transparent lg:p-0">
-        <Link
-          href="/"
-          className="relative text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
-        >
-          Project Moss
-        </Link>
-      </header>
+      <MobileScrollFade>
+        <header className="fixed inset-x-0 top-0 z-50 px-6 py-4 sm:px-8 lg:left-10 lg:right-auto lg:top-8 lg:bg-transparent lg:p-0">
+          <Link
+            href="/"
+            className="relative text-lg font-light tracking-tight text-moss-ink/70 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+          >
+            Project Moss
+          </Link>
+        </header>
+      </MobileScrollFade>
 
       <main className="relative z-0 flex min-h-screen flex-col sm:flex-row">
         {/* Left half — about / intro */}

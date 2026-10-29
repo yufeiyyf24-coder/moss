@@ -81,13 +81,13 @@ export const projects: Project[] = [
     cover: "/projects/shouhuxing/cover.jpg",
   },
   {
-    slug: "cptsd",
-    title: "安途",
-    subtitle: "C-PTSD 双场景调节系统 · 骨传导耳机 + 智能坐垫",
+    slug: "cike",
+    title: "此刻",
+    subtitle: "挑几个词，留住当下的感受",
     summary:
-      "将 EMDR 双侧刺激、稳定化技术与体感安抚隐形于运动颈圈与家居坐垫中，在病耻感为零的前提下提供实时被动守护。",
+      "从精神科门诊里一句「最近怎么样」开始：用六类口语化标签和 1–5 的行为锚点，把说不清的感受留成一份能带进诊室的记录。独立完成的 UI/UX 项目，无账号、无服务器、无网络权限。",
     domains: ["mind"],
-    status: "seed",
+    status: "growing",
   },
   {
     slug: "asthma",
@@ -99,13 +99,13 @@ export const projects: Project[] = [
     status: "growing",
   },
   {
-    slug: "cike",
-    title: "此刻",
-    subtitle: "挑几个词，留住当下的感受",
+    slug: "cptsd",
+    title: "安途",
+    subtitle: "C-PTSD 双场景调节系统 · 骨传导耳机 + 智能坐垫",
     summary:
-      "从精神科门诊里一句「最近怎么样」开始：用六类口语化标签和 1–5 的行为锚点，把说不清的感受留成一份能带进诊室的记录。独立完成的 UI/UX 项目，无账号、无服务器、无网络权限。",
+      "将 EMDR 双侧刺激、稳定化技术与体感安抚隐形于运动颈圈与家居坐垫中，在病耻感为零的前提下提供实时被动守护。",
     domains: ["mind"],
-    status: "growing",
+    status: "seed",
   },
   {
     slug: "moor",

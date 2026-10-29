@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Project, Domain, domainBgClass } from "@/lib/content";
+import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 
 export function GrowthNode({
   project,
@@ -30,35 +31,33 @@ export function GrowthNode({
   return (
     <article className="relative z-10 min-h-screen">
       {/* top navigation bar */}
-      <div className="fixed inset-x-0 top-0 z-40 px-5 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-10 lg:py-5">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 hidden h-28 bg-gradient-to-b from-white via-white/85 to-transparent lg:block"
-        />
-        <div className="relative flex items-center justify-between gap-3">
-          <Link
-            href={`/${domain.id}`}
-            className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
-          >
-            <span className="sm:hidden">← {domain.label}</span>
-            <span className="hidden sm:inline">← 回到 {domain.label}</span>
-          </Link>
-          <span className="flex shrink-0 items-center gap-3 sm:gap-5">
-            <span
-              className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
-            >
-              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
-              {domain.sub}
-            </span>
+      <MobileScrollFade>
+        <div className="fixed inset-x-0 top-0 z-40 px-5 py-4 sm:px-10 lg:py-5">
+          <div className="relative flex items-center justify-between gap-3">
             <Link
-              href="/"
-              className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+              href={`/${domain.id}`}
+              className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
             >
-              Project Moss
+              <span className="sm:hidden">← {domain.label}</span>
+              <span className="hidden sm:inline">← 回到 {domain.label}</span>
             </Link>
-          </span>
+            <span className="flex shrink-0 items-center gap-3 sm:gap-5">
+              <span
+                className={`hidden items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-light text-moss-ink/60 ring-1 ring-white/70 sm:inline-flex`}
+              >
+                <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
+                {domain.sub}
+              </span>
+              <Link
+                href="/"
+                className="text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
+              >
+                Project Moss
+              </Link>
+            </span>
+          </div>
         </div>
-      </div>
+      </MobileScrollFade>
 
       {/* hero */}
       <section className="relative px-6 pb-12 pt-36 sm:px-10 sm:pt-44 lg:px-20">

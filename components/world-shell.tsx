@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LakeLayer } from "@/components/lake-layer";
+import { MobileScrollFade } from "@/components/mobile-scroll-fade";
 import { WindLayer } from "@/components/wind-layer";
 import { RippleSurface } from "@/components/ripple-surface";
 import { WaterTrail } from "@/components/water-trail";
@@ -38,29 +39,26 @@ export function WorldShell({
       )}
 
       {!hideHeader && (
-        <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 max-lg:bg-white/85 max-lg:shadow-[0_1px_0_rgba(58,74,56,0.07)] max-lg:backdrop-blur-md sm:px-10 lg:py-5">
-          {/* 桌面端保留轻盈的顶部渐隐；平板与手机用实底栏避免正文透出 */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 hidden h-28 bg-gradient-to-b from-white via-white/85 to-transparent lg:block"
-          />
-          <div className="relative flex items-center justify-between gap-4">
-            {backHref && (
+        <MobileScrollFade>
+          <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 sm:px-10 lg:py-5">
+            <div className="relative flex items-center justify-between gap-4">
+              {backHref && (
+                <Link
+                  href={backHref}
+                  className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+                >
+                  {backLabel ?? "← 返回"}
+                </Link>
+              )}
               <Link
-                href={backHref}
-                className="min-w-0 truncate text-sm font-light tracking-wide text-moss-ink/60 transition-colors duration-500 hover:text-moss-ink"
+                href="/"
+                className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
               >
-                {backLabel ?? "← 返回"}
+                Project Moss
               </Link>
-            )}
-            <Link
-              href="/"
-              className="shrink-0 text-lg font-light tracking-tight text-moss-ink/75 transition-colors duration-500 hover:text-moss-ink sm:text-xl"
-            >
-              Project Moss
-            </Link>
-          </div>
-        </header>
+            </div>
+          </header>
+        </MobileScrollFade>
       )}
 
       {children}
