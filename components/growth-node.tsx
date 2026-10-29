@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Project, Domain, domainBgClass } from "@/lib/content";
+import { MobileContentFade } from "@/components/mobile-content-fade";
 
 export function GrowthNode({
   project,
@@ -56,49 +57,51 @@ export function GrowthNode({
         </div>
       </div>
 
-      {/* hero */}
-      <section className="relative px-6 pb-12 pt-36 sm:px-10 sm:pt-44 lg:px-20">
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.2, 0, 0.2, 1] }}
-          className="max-w-4xl"
-        >
-          <span className="mb-5 flex items-center gap-2 text-xs font-medium tracking-[0.2em] text-moss-ink/55">
-            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
-            {domain.label.toUpperCase()} / {project.status === "growing" ? "正在生长" : project.status === "seed" ? "种子" : "根系"}
-          </span>
-
-          <h1 className="mb-4 font-wenkai text-4xl font-light leading-tight text-moss-ink sm:text-5xl lg:text-6xl">
-            {project.title}
-          </h1>
-
-          <p className="mb-6 max-w-2xl text-xl font-light leading-relaxed text-moss-ink/80 sm:text-2xl">
-            {project.subtitle}
-          </p>
-
-          <p className="max-w-2xl text-base font-light leading-7 text-moss-ink/65 sm:text-lg sm:leading-8">
-            {project.summary}
-          </p>
-        </motion.div>
-
-        {project.cover && (
+      <MobileContentFade>
+        {/* hero */}
+        <section className="relative px-6 pb-12 pt-36 sm:px-10 sm:pt-44 lg:px-20">
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.2, 0, 0.2, 1] }}
-            className="mt-14 aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-2xl bg-moss-warm/60 shadow-sm"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.2, 0, 0.2, 1] }}
+            className="max-w-4xl"
           >
-            <img
-              src={project.cover}
-              alt={project.title}
-              className="h-full w-full object-cover"
-            />
-          </motion.div>
-        )}
-      </section>
+            <span className="mb-5 flex items-center gap-2 text-xs font-medium tracking-[0.2em] text-moss-ink/55">
+              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${bgClass}`} />
+              {domain.label.toUpperCase()} / {project.status === "growing" ? "正在生长" : project.status === "seed" ? "种子" : "根系"}
+            </span>
 
-      {children}
+            <h1 className="mb-4 font-wenkai text-4xl font-light leading-tight text-moss-ink sm:text-5xl lg:text-6xl">
+              {project.title}
+            </h1>
+
+            <p className="mb-6 max-w-2xl text-xl font-light leading-relaxed text-moss-ink/80 sm:text-2xl">
+              {project.subtitle}
+            </p>
+
+            <p className="max-w-2xl text-base font-light leading-7 text-moss-ink/65 sm:text-lg sm:leading-8">
+              {project.summary}
+            </p>
+          </motion.div>
+
+          {project.cover && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.2, 0, 0.2, 1] }}
+              className="mt-14 aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-2xl bg-moss-warm/60 shadow-sm"
+            >
+              <img
+                src={project.cover}
+                alt={project.title}
+                className="h-full w-full object-cover"
+              />
+            </motion.div>
+          )}
+        </section>
+
+        {children}
+      </MobileContentFade>
     </article>
   );
 }

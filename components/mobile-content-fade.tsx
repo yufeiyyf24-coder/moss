@@ -1,38 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /**
- * 手机端（<lg）页面内容随滚动下沉：离开页面顶端后整块内容保持半透明，
- * 回到顶端恢复全亮。顶栏与返回键不在其中，始终保持清晰。
+ * 手机端（<lg）内容顶部渐隐：离开页面顶端后，内容在固定顶栏下方
+ * 约 104px 范围内逐渐透明，滚回顶端则完全撤销。顶栏本身不受影响。
+ * 通过 mask-position 跟随滚动，让透明带始终贴在视口顶部——
+ * 直接给容器加 mask-image 会随文档滚走，所以这里每帧同步一次位置。
  */
 export function MobileContentFade({ children }: { children: React.ReactNode }) {
-  const [away, setAway] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setAway(false);
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+
+    const clear = () => {
+      el.style.maskImage = "";
+      el.style.webkitMaskImage = "";
+      el.style.maskPosition = "";
+      el.style.webkitMaskPosition = "";
+      el.style.maskSize = "";
+      el.style.webkitMaskSize = "";
+      el.style.maskRepeat = "";
+      el.style.webkitMaskRepeat = "";
+    };
+
+    const apply = () => {
+      raf = 0;
+      if (window.innerWidth >= 1024 || window.scrollY <= 8) {
+        clear();
         return;
       }
-      setAway(window.scrollY > 8);
+      const gradient =
+        "linear-gradient(to bottom, transparent 0, #000 104px)";
+      el.style.webkitMaskImage = gradient;
+      el.style.maskImage = gradient;
+      el.style.webkitMaskSize = "100% 100vh";
+      el.style.maskSize = "100% 100vh";
+      el.style.webkitMaskRepeat = "repeat-y";
+      el.style.maskRepeat = "repeat-y";
+      el.style.webkitMaskPosition = `0 ${window.scrollY}px`;
+      el.style.maskPosition = `0 ${window.scrollY}px`;
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
     };
   }, []);
 
-  return (
-    <div
-      className={`max-lg:transition-opacity max-lg:duration-500 ${
-        away ? "max-lg:opacity-50" : "max-lg:opacity-100"
-      }`}
-    >
-      {children}
-    </div>
-  );
+  return <div ref={ref}>{children}</div>;
 }
