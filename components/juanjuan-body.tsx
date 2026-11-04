@@ -26,9 +26,46 @@ const loginScreens = [
   { src: "/projects/juanjuan/login-code-error.webp", caption: "验证码错误状态" },
 ];
 
-function ScreenGrid({ screens }: { screens: { src: string; caption: string }[] }) {
+const checkinScreens = [
+  { src: "/projects/juanjuan/checkin-home.webp", caption: "首页 · 相机入口" },
+  { src: "/projects/juanjuan/checkin-camera.webp", caption: "拍照 · 取景" },
+  { src: "/projects/juanjuan/checkin-preview.webp", caption: "确认照片 · 重拍 / 使用" },
+  { src: "/projects/juanjuan/checkin-actions.webp", caption: "想和卷卷做什么 · 三种互动" },
+  { src: "/projects/juanjuan/checkin-locate.webp", caption: "正在确认位置" },
+  { src: "/projects/juanjuan/checkin-permission.webp", caption: "相机权限提示" },
+  { src: "/projects/juanjuan/checkin-card-edit.webp", caption: "打卡纪念卡 · 编辑" },
+  { src: "/projects/juanjuan/checkin-card.webp", caption: "打卡纪念卡 · 私人纪念与公共留言" },
+  { src: "/projects/juanjuan/checkin-share.webp", caption: "分享 · 可选择是否包含私人文字" },
+];
+
+const atlasScreens = [
+  { src: "/projects/juanjuan/atlas-collection.webp", caption: "地球图鉴 · 明信片 / 打卡纪念 / 物品 / 票夹" },
+  { src: "/projects/juanjuan/atlas-memory.webp", caption: "私人纪念 · 照片与一句话" },
+  { src: "/projects/juanjuan/atlas-board.webp", caption: "公共留言板" },
+];
+
+const journalScreens = [
+  { src: "/projects/juanjuan/journal-view.webp", caption: "手账 · 拼贴页面" },
+  { src: "/projects/juanjuan/journal-edit.webp", caption: "编辑状态 · 增删与书写" },
+  { src: "/projects/juanjuan/journal-add.webp", caption: "选择要添加的元素" },
+  { src: "/projects/juanjuan/journal-pick.webp", caption: "从地球图鉴挑选明信片" },
+  { src: "/projects/juanjuan/journal-selected.webp", caption: "已选素材 · 明信片 / 车票 / 物品" },
+];
+
+const screenGap =
+  "gap-x-5 gap-y-14 sm:gap-x-8 sm:gap-y-20 lg:gap-x-12 lg:gap-y-24";
+
+function ScreenGrid({
+  screens,
+  columns = "lg:grid-cols-4",
+  gap = screenGap,
+}: {
+  screens: { src: string; caption: string }[];
+  columns?: string;
+  gap?: string;
+}) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+    <div className={`grid grid-cols-2 ${gap} ${columns}`}>
       {screens.map((screen) => (
         <a
           key={screen.src}
@@ -65,7 +102,7 @@ export function JuanjuanBody() {
         </p>
         <p className="mt-4">
           我负责 IP 设计与插画、界面视觉和 UI：从家园里的四个房间，到第一次见面的引导流程、
-          登录与各种界面状态；也保留了一些角色设定、手稿和动效。
+          登录，再到地球图鉴、贴贴打卡与手账；也保留了一些角色设定、手稿和动效。
         </p>
         <p className="mt-4">
           视觉方向是一本可以点开的图画书：米色纸、蓝白格纹和朱红手写字，
@@ -200,27 +237,102 @@ export function JuanjuanBody() {
       <GrowthDivider />
 
       <GrowthSection title="家园" subtitle="四个房间视角" layout="wide">
-        <ScreenGrid screens={homeScreens} />
+        <div className="mx-auto max-w-5xl">
+          <ScreenGrid screens={homeScreens} />
+        </div>
       </GrowthSection>
 
       <GrowthDivider />
 
       <GrowthSection title="初次见面" subtitle="从贴贴到进入家园" layout="wide">
-        <ScreenGrid screens={onboardingScreens} />
+        <div className="mx-auto max-w-5xl">
+          <ScreenGrid screens={onboardingScreens} />
+        </div>
       </GrowthSection>
 
       <GrowthDivider />
 
       <GrowthSection title="登录" subtitle="密码 / 验证码 / 错误状态" layout="wide">
-        <ScreenGrid screens={loginScreens} />
+        <div className="max-w-[756px]">
+          <ScreenGrid screens={loginScreens} columns="lg:grid-cols-3" />
+        </div>
+      </GrowthSection>
+
+      <GrowthDivider />
+
+      <GrowthSection title="贴贴打卡" subtitle="拍一张照片，留下当天的纪念" layout="wide">
+        <p className="max-w-3xl">
+          把挂在手机上的卷卷带出门：拍一张照片，选「陪伴出行 / 贴贴卷卷 / 晚安」，
+          确认位置后生成一张打卡纪念卡。卡片上是照片和地点时间，下面留一句只属于自己的记录；
+          公共留言板可以读别人留下的句子，也可以自己写一句。相机权限、正在定位这些状态，
+          也沿用了同一套图画书语言。
+        </p>
+
+        <div className="mt-8 max-w-[756px]">
+          <ScreenGrid screens={checkinScreens} columns="lg:grid-cols-3" />
+        </div>
+      </GrowthSection>
+
+      <GrowthDivider />
+
+      <GrowthSection title="地球图鉴" subtitle="明信片 / 打卡纪念 / 物品 / 票夹" layout="wide">
+        <p className="max-w-3xl">
+          旅行的痕迹被收进一本图鉴：明信片、打卡纪念、物品和票夹四个分栏。
+          每个地方有自己的印章和成套明信片，点开一张可以看大图、自己写一句，
+          也可以翻开公共留言板。
+        </p>
+
+        <div className="mt-8 max-w-[756px]">
+          <ScreenGrid screens={atlasScreens} columns="lg:grid-cols-3" />
+        </div>
+
+        <div className="mt-12 flex items-baseline justify-between gap-4">
+          <h3 className="text-sm font-medium tracking-wide text-moss-ink/60">票夹</h3>
+          <span className="text-xs font-light tracking-wide text-moss-ink/40">
+            纸品 / 车票设计
+          </span>
+        </div>
+
+        <figure className="mt-4">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-[0_10px_28px_rgba(58,74,56,0.08)] ring-1 ring-moss-green/10">
+            <img
+              src="/projects/juanjuan/ticket-design.webp"
+              alt="卷卷车票设计：晨光站出发的上车凭证"
+              loading="lazy"
+              className="w-full"
+            />
+          </div>
+          <figcaption className="mt-2.5 text-xs font-light tracking-wide text-moss-ink/55">
+            车票 · 晨光站 → ？（2026.11.16）
+          </figcaption>
+        </figure>
+      </GrowthSection>
+
+      <GrowthDivider />
+
+      <GrowthSection title="手账" subtitle="把旅行带回来的东西贴起来" layout="wide">
+        <p className="max-w-3xl">
+          把图鉴里的东西贴进手账：明信片、车票、物品都能作为素材加进来，
+          配上手绘贴纸、胶带和一句当天的心情。编辑状态下的工具只有加、删、写三个动作，
+          界面尽量像一张真的纸。
+        </p>
+
+        <div className="mt-8">
+          <ScreenGrid
+            screens={journalScreens}
+            columns="lg:grid-cols-5"
+            gap="gap-4 sm:gap-6"
+          />
+        </div>
       </GrowthSection>
 
       <GrowthDivider />
 
       <GrowthSection title="说明">
         <p className="text-sm leading-6 text-moss-ink/55">
-          实习项目 · 实体挂件 + App 陪伴产品。界面为 UI 前端交付图；IP 设计、手稿与动效为过程稿，
-          保留原始导出画面。界面图已裁去顶部的系统状态栏占位，仅作展示。
+          实习项目 · 实体挂件 + App 陪伴产品。界面为 UI 前端交付图与后期界面设计稿；
+          IP 设计、手稿与动效为过程稿，保留原始导出画面。新增的界面图保留了顶部的时间 /
+          电量状态条，仅作展示。
         </p>
       </GrowthSection>
 
