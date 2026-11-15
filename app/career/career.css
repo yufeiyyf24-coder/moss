@@ -1,0 +1,122 @@
+/* Career page — paper, arcs, floating cards, and one continuous line. */
+
+.career-page {
+  --career-bg: #f3f3ec;
+  --career-fg: #303b35;
+  --career-muted: #737e74;
+  --career-border: #ccd2c6;
+  --career-accent: #617a5e;
+  --career-accent-soft: #e2e8dc;
+}
+
+.career-page .font-editorial {
+  font-family: Georgia, "Times New Roman", "Songti SC", "Noto Serif SC",
+    "Source Han Serif SC", "SimSun", serif;
+}
+
+@keyframes career-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes career-card-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-11px);
+  }
+}
+
+.career-arc {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.career-arc-out {
+  width: min(1580px, 162vw);
+  aspect-ratio: 1;
+  border-color: transparent transparent rgba(204, 210, 198, 0.85)
+    rgba(204, 210, 198, 0.85);
+  animation: career-turn 80s linear infinite reverse;
+}
+
+.career-arc-in {
+  width: min(1040px, 106vw);
+  aspect-ratio: 1;
+  border-color: transparent rgba(204, 210, 198, 0.58)
+    rgba(204, 210, 198, 0.58) transparent;
+  animation: career-turn 80s linear infinite;
+}
+
+.career-card {
+  animation: career-card-float var(--career-float-duration, 10s) ease-in-out
+    infinite;
+  animation-delay: var(--career-float-delay, 0s);
+}
+
+.career-texture {
+  background:
+    radial-gradient(
+      38% 46% at 32% 28%,
+      rgba(97, 122, 94, 0.11) 0 62%,
+      transparent 63%
+    ),
+    radial-gradient(
+      30% 38% at 72% 68%,
+      rgba(97, 122, 94, 0.13) 0 62%,
+      transparent 63%
+    ),
+    repeating-linear-gradient(
+      48deg,
+      rgba(97, 122, 94, 0.07) 0 1px,
+      transparent 1px 11px
+    );
+}
+
+.career-project .career-details {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  pointer-events: none;
+}
+
+.career-project:hover .career-details,
+.career-project:focus-within .career-details,
+.career-project.open .career-details {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.career-paused .career-arc,
+.career-paused .career-card {
+  animation-play-state: paused;
+}
+
+@media (max-width: 1023px) {
+  .career-project .career-details {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .career-arc,
+  .career-card {
+    animation: none;
+  }
+
+  .career-project .career-details {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
